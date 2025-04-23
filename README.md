@@ -13,7 +13,7 @@ Add to `composer.json` file in your project root to require this plugin:
 ```json
 {
   "require": {
-    "wsydney76/craft-properties-field": "^1.0.0-beta.1"
+    "wsydney76/craft-properties-field": "dev-main"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
@@ -24,6 +24,12 @@ Add to `composer.json` file in your project root to require this plugin:
     }
   ]
 }
+```
+
+Then run the following command to install the plugin:
+
+```bash
+ddev craft plugin/install _properties-field
 ```
 
 ## Motivation
@@ -37,6 +43,8 @@ This is an extended version of a plugin used for years in a private project, upd
 These additions require a beta version of the plugin to be released, as they are not yet fully tested.
 
 No warranty is given, and no support is provided.
+
+Work in progress.
 
 ## Screenshots
 
@@ -141,7 +149,7 @@ Each property is an array with the following keys:
 * `value`: The raw value of the property
 * `normalizedValue`: The normalized value of the property, depending on the type:
   * `date`: A formated date string
-  * `entry/assets`: A single element (or null)
+  * `entry/asset`: A single element (or null)
   * `entries/assets`: An array of elements (or empty array)
   * `other`: The raw value
 
