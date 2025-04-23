@@ -1,0 +1,46 @@
+{% import '_includes/forms.twig' as forms %}
+{# @var settings \wsydney76\propertiesfield\models\Settings #}
+
+{{ forms.lightswitchField({
+    label: 'Show table header'|t('_properties-field'),
+    name: 'showTableHeader',
+    on: settings.showTableHeader,
+    onLabel: 'Show header columns (Property/Value)'|t('_properties-field'),
+    warning: config.showTableHeader is defined ? _self.configWarning('showTableHeader')
+}) }}
+
+{{ forms.textField({
+    label: 'Date output format'|t('_properties-field'),
+    name: 'dateFormat',
+    value: settings.dateFormat,
+    instructions: 'The format used for normalized date output'|t('_properties-field'),
+    tip: 'This can be anything that Craft::$app->formatter->asDate() accepts, typically `short/medium/long`'|t('_properties-field'),
+    warning: config.dateFormat is defined ? _self.configWarning('dateFormat')
+}) }}
+
+{{ forms.selectField({
+    label: 'View Mode for entries sub-fields'|t('_properties-field'),
+    name: 'entriesViewMode',
+    value: settings.entriesViewMode,
+    options: [
+        {label: 'Cards'|t('_properties-field'), value: 'cards'},
+        {label: 'List'|t('_properties-field'), value: 'list'},
+    ],
+    warning: config.entriesViewMode is defined ? _self.configWarning('entriesViewMode')
+}) }}
+
+{{ forms.selectField({
+    label: 'View Mode for assets sub-fields'|t('_properties-field'),
+    name: 'assetsViewMode',
+    value: settings.assetsViewMode,
+    options: [
+        {label: 'Cards'|t('_properties-field'), value: 'cards'},
+        {label: 'List'|t('_properties-field'), value: 'list'},
+    ],
+    warning: config.assetsViewMode is defined ? _self.configWarning('assetsViewMode')
+}) }}
+
+
+{% macro configWarning(setting) -%}
+    {{ 'This is being overridden by the `{setting}` config setting and cannot be changed here.'|t('_properties-field', {setting: setting })|markdown(inlineOnly=true) }}
+{%- endmacro %}

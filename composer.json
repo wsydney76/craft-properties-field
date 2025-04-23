@@ -1,0 +1,32 @@
+{
+  "name": "wsydney76/craft-properties-field",
+  "description": "Adds a properties field type",
+  "version": "1.0.0-beta.1",
+  "type": "craft-plugin",
+  "require": {
+    "php": ">=8.2",
+    "craftcms/cms": "^5.0.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "wsydney76\\propertiesfield\\": "src/"
+    }
+  },
+  "extra": {
+    "handle": "_properties-field",
+    "name": "Properties Field",
+    "developer": "wsydney76",
+    "documentationUrl": "https://github.com/wsydney76/craft-properties-field",
+    "class": "wsydney76\\propertiesfield\\PropertiesFieldPlugin"
+  },
+  "config": {
+    "sort-packages": true,
+    "platform": {
+      "php": "8.2"
+    },
+    "allow-plugins": {
+      "yiisoft/yii2-composer": true,
+      "craftcms/plugin-installer": true
+    }
+  }
+}

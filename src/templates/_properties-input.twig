@@ -1,0 +1,148 @@
+{# @param propertiesFieldConfig array The list of configured properties #}
+{# @param properties array the property values as stored in the database #}
+{# @param element Element The currently edited element #}
+{# @param field Field The field type #}
+{# @param settings Settings The plugin settings #}
+
+
+{% import '_includes/forms.twig' as forms %}
+
+
+{% namespace field.handle %}
+    <table class="editable fullwidth">
+
+        {% if settings.showTableHeader %}
+            <thead>
+            <tr>
+                <th scope="col" class="singleline-cell textual">{{ 'Property'|t }}</th>
+                <th scope="col" class="multiline-cell textual">{{ 'Value'|t }}</th>
+            </tr>
+            </thead>
+        {% endif %}
+
+        <tbody>
+        {% for propertyConfig in propertiesFieldConfig %}
+            <tr>
+                <th class="heading-cell thin" style="text-align: left; padding: 7px;">
+                    {{ propertyConfig.name|t }}
+                    {% if propertyConfig.instructions ?? null %}
+                        <span class="info">
+                            {{ propertyConfig.instructions|t }}
+                        </span>
+                    {% endif %}
+                    {% if propertyConfig.required ?? false %}
+                        <span class="required"></span>
+                    {% endif %}
+                </th>
+
+                <td class="singleline-cell textual">
+                    {% switch propertyConfig.type %}
+
+                    {% case 'text' or 'number' or 'email' %}
+
+                        {{ forms.text({
+                            name: propertyConfig.handle,
+                            type: propertyConfig.type,
+                            value: properties[propertyConfig.handle] ?? '',
+                            placeholder: propertyConfig.placeholder ?? ''
+                        }) }}
+
+                    {% case 'date' %}
+
+                        {{ forms.date({
+                            name: propertyConfig.handle,
+                            type: propertyConfig.type,
+                            value: properties[propertyConfig.handle] ?? '',
+                            placeholder: propertyConfig.placeholder ?? ''
+                        }) }}
+
+                    {% case "textarea" %}
+
+                        {{ forms.textArea({
+                            name: propertyConfig.handle,
+                            value: properties[propertyConfig.handle] ?? '',
+                            placeholder: propertyConfig.placeholder ?? '',
+                            rows: 2,
+                            class: 'nicetext',
+                        }) }}
+
+                    {% case 'boolean' %}
+                        <div style="padding: 16px 8px 8px 8px">
+                            {{ forms.lightswitch({
+                                name: propertyConfig.handle,
+                                type: propertyConfig.type,
+                                on: properties[propertyConfig.handle] ?? '',
+                                placeholder: propertyConfig.placeholder ?? ''
+                            }) }}
+                        </div>
+                    {% case "select" %}
+                        {% set options = propertyConfig.options|replace('\r','')|split('\n')|map(option => option|split(':', 2)) %}
+
+                        {% set optionValue = properties[propertyConfig.handle] ?? '' %}
+
+                        {% set options = options|map(option => {
+                            value: option[0],
+                            label: option|length == 2 ? option [1] : option[0]
+                        }) %}
+
+                        {% if not propertyConfig.required %}
+                            {% set options = options|unshift({value: '', label: '-'}) %}
+                        {% endif %}
+
+                        <div style="padding: 8px;">
+                            {{ forms.select({
+                                name: propertyConfig.handle,
+                                value: properties[propertyConfig.handle] ?? '',
+                                placeholder: propertyConfig.placeholder ?? '',
+                                options: options,
+                            }) }}
+                        </div>
+
+                    {% case "entry" or "entries" or "asset" or "assets" %}
+                        {% if not propertyConfig.options %}
+                            {% exit 403 "No source provided" %}
+                        {% endif %}
+
+                        {% set value = properties[propertyConfig.handle] ?? null %}
+
+                        {% if propertyConfig.type == 'entry' or propertyConfig.type == 'entries' %}
+                            {% set sectionHandles = propertyConfig.options|split(',') %}
+                            {% set sources = sectionHandles|map(handle => "section:#{craft.app.entries.sectionByHandle(handle).uid}") %}
+                            {% set elementType = 'craft\\elements\\Entry' %}
+                            {% set elements = value ? craft.entries.id(properties[propertyConfig.handle]).all : [] %}
+                            {% set isSingle = propertyConfig.type == 'entry' %}
+                            {% set viewMode = settings.entriesViewMode %}
+                        {% endif %}
+
+                        {% if propertyConfig.type == 'asset' or propertyConfig.type == 'assets' %}
+                            {% set volumeHandles = propertyConfig.options|split(',') %}
+                            {% set sources = volumeHandles|map(handle => "volume:#{craft.app.volumes.volumeByHandle(handle).uid}") %}
+                            {% set elementType = 'craft\\elements\\Asset' %}
+                            {% set elements = value ? craft.assets.id(properties[propertyConfig.handle]).all : [] %}
+                            {% set isSingle = propertyConfig.type == 'asset' %}
+                            {% set viewMode = settings.assetsViewMode %}
+                        {% endif %}
+
+                        <div style="padding: 8px;">
+
+                            {{ forms.elementSelect({
+                                name: propertyConfig.handle,
+                                elements: elements,
+                                elementType: elementType,
+                                single: isSingle,
+                                viewMode: viewMode,
+                                showCardsInGrid: true,
+                                sources: sources
+                            }) }}
+
+                        </div>
+
+                    {% endswitch %}
+
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endnamespace %}
