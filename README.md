@@ -54,18 +54,30 @@ Work in progress.
 
 ````json
 {
-    "2563c798-42f7-493c-9bb8-9465a8355a72": {
-        "bio": "Nam ipsum risus, rutrum vitae, vestibulum eu, molestie vel, lacus. Donec vitae sapien ut libero venenatis faucibus. Praesent metus tellus, elementum eu, semper a, adipiscing nec, purus. Quisque libero metus, condimentum nec, tempor a, commodo mollis, magna. Mauris turpis nunc, blandit et, volutpat molestie, porta ut, ligula.\r\n\r\nQuisque malesuada placerat nisl. Curabitur turpis. Etiam vitae tortor. Cras non dolor. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu.",
-        "born": "1987-04-30T00:00:00+02:00",
-        "name": "Erna Klawuppke",
-        "image": "942",
-        "active": "1",
-        "gender": "f",
-        "relatedPosts": [
-            "5231",
-            "5215"
-        ]
-    }
+  "2563c798-42f7-493c-9bb8-9465a8355a72": {
+    "bio": "Nam ipsum risus, rutrum vitae, vestibulum eu, molestie vel, lacus. Donec vitae sapien ut libero venenatis faucibus. Praesent metus tellus, elementum eu, semper a, adipiscing nec, purus. Quisque libero metus, condimentum nec, tempor a, commodo mollis, magna. Mauris turpis nunc, blandit et, volutpat molestie, porta ut, ligula.\r\n\r\nQuisque malesuada placerat nisl. Curabitur turpis. Etiam vitae tortor. Cras non dolor. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu.",
+    "born": "1987-04-30T00:00:00+02:00",
+    "name": "Erna Klawuppke",
+    "image": "942",
+    "active": "1",
+    "gender": "f",
+    "trainer": {
+      "isOn": "1",
+      "comment": "Offers remote courses on coding"
+    },
+    "inCompany": {
+      "unit": "Years",
+      "quantity": "5"
+    },
+    "mentoring": {
+      "isOn": "",
+      "comment": "Not yet ready, planned for 10\/2025"
+    },
+    "relatedPosts": [
+      "5231",
+      "5215"
+    ]
+  }
 }
 ````
 
@@ -83,18 +95,21 @@ A list of properties to be displayed in the field. Each property has the followi
 
 * Name: The name of the property
 * Handle: The handle of the property
-* Placeholder: The placeholder text fields
-* Instructions: Instructions for the field, displayed in a popup via an `info` icon
-* Required: Whether the field is required
-* Type: The type of the field. The following types are supported:
+* Placeholder: The placeholder for text properties
+* Instructions: Instructions for the property, displayed in a popup via an `info` icon
+* Required: Whether the property is required
+* Type: The type of the property. The following types are supported:
   * Text: A single line text field
   * Textarea: A multi-line text field
   * Number: A number field
   * Email: An email field
+  * Boolean: A boolean field (lightswitch)
   * Select: A select field with options
   * Date: A date field
   * Entry/Entries: An entries field with one or multiple entries
   * Asset/Assets: An assets field with one or multiple assets
+  * Boolean with comment: A boolean field combined with a comment field (experimental)
+  * Dimension: Combines a number field with a text field for the unit (experimental)
 * Options: The options for the field. The following options are supported:
   * Select: A list of options for the select field, in the format `value:label`
   * Entry/Entries: A comma-separated list of section handles
@@ -190,5 +205,16 @@ TODO: Check why `.relatedTo({targetElement: 5231, field: 'personalData'})` does 
 
 This does not differentiate between the different sub-fields, so all entries selected by any sub-field are returned.
 
+## Roadmap for beta.2
 
+### Merged:
 
+* 'Boolean with comment' property type
+* 'Dimension' property type
+
+### Todo:
+
+* Support 'required' setting for combined fields
+* Support 'normalizedValue' for combined fields
+* Allow customization of property types
+* Load input field templates for property types dynamically

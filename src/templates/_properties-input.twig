@@ -137,6 +137,44 @@
 
                         </div>
 
+                    {% case "extendedBoolean" %}
+                        <div style="padding: 16px 8px 8px 8px; display: flex; align-items: center">
+                            {{ forms.lightswitch({
+                                name: "#{propertyConfig.handle}[isOn]",
+                                on: properties[propertyConfig.handle]['isOn'] ?? '',
+                            }) }}
+
+                            {{ forms.text({
+                                name: "#{propertyConfig.handle}[comment]",
+                                label: 'Comment',
+                                class: 'text-combined text-margin',
+                                placeholder: 'Comment',
+                                value: properties[propertyConfig.handle]['comment'] ?? ''
+                            }) }}
+                        </div>
+
+                    {% case "dimension" %}
+                        <div style="padding: 16px 8px 8px 8px; display: flex; align-items: center">
+                            <div>
+                                {{ forms.textField({
+                                    name: "#{propertyConfig.handle}[quantity]",
+                                    label: 'Quantity',
+                                    type: 'number',
+                                    class: 'text-combined',
+                                    value: properties[propertyConfig.handle]['quantity'] ?? ''
+                                }) }}
+                            </div>
+
+                            <div>
+                                {{ forms.textField({
+                                    name: "#{propertyConfig.handle}[unit]",
+                                    label: 'Unit',
+                                    class: 'text-combined text-margin',
+                                    value: properties[propertyConfig.handle]['unit'] ?? '',
+                                    first: true
+                                }) }}
+                            </div>
+                        </div>
                     {% endswitch %}
 
                 </td>
@@ -146,3 +184,12 @@
     </table>
 
 {% endnamespace %}
+
+{% css %}
+.text-combined {
+    border: 1px solid gray !important;
+}
+.text-margin {
+    margin-left: 8px;
+}
+{% endcss %}

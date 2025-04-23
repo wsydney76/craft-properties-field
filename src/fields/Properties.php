@@ -127,6 +127,8 @@ class Properties extends Field implements RelationalFieldInterface
                         ['label' => 'Entry (Multi)', 'value' => 'entries'],
                         ['label' => 'Asset (Single)', 'value' => 'asset'],
                         ['label' => 'Asset (Multi)', 'value' => 'assets'],
+                        ['label' => 'Boolean with comment', 'value' => 'extendedBoolean'],
+                        ['label' => 'Dimension', 'value' => 'dimension'],
 //                        ['label' => 'Multi-select', 'value' => 'multiselect'],
                     ],
                     'width' => '10%',
