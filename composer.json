@@ -3,6 +3,7 @@
   "description": "Adds a properties field type",
   "version": "1.0.0-beta.1",
   "type": "craft-plugin",
+  "license": "MIT",
   "require": {
     "php": ">=8.2",
     "craftcms/cms": "^5.0.0"
