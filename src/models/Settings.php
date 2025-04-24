@@ -47,6 +47,7 @@ class Settings extends Model
             'label' => 'Date',
             'type' => 'date',
             'template' => '_properties-field/_inputs/date.twig',
+            'normalize' => [PropertiesModel::class, 'normalizeDate'],
         ],
         'select' => [
             'label' => 'Select',
@@ -57,34 +58,42 @@ class Settings extends Model
             'label' => 'Entry (Single)',
             'type' => 'entry',
             'template' => '_properties-field/_inputs/elementSelect.twig',
+            'normalize' => [PropertiesModel::class, 'normalizeEntry'],
         ],
         'entries' => [
             'label' => 'Entry (Multi)',
             'type' => 'entries',
             'template' => '_properties-field/_inputs/elementSelect.twig',
+            'normalize' => [PropertiesModel::class, 'normalizeEntries'],
         ],
         'asset' => [
             'label' => 'Asset (Single)',
             'type' => 'asset',
             'template' => '_properties-field/_inputs/elementSelect.twig',
+            'normalize' => [PropertiesModel::class, 'normalizeAsset'],
         ],
         'assets' => [
             'label' => 'Asset (Multi)',
             'type' => 'assets',
             'template' => '_properties-field/_inputs/elementSelect.twig',
+            'normalize' => [PropertiesModel::class, 'normalizeAssets'],
         ],
         'extendedBoolean' => [
             'label' => 'Boolean with comment',
             'type' => 'extendedBoolean',
             'template' => '_properties-field/_inputs/extendedBoolean.twig',
+            'normalize' => [PropertiesModel::class, 'normalizeExtendedBoolean'],
         ],
         'dimension' => [
             'label' => 'Dimension',
             'type' => 'dimension',
             'template' => '_properties-field/_inputs/dimension.twig',
+            'normalize' => [PropertiesModel::class, 'normalizeDimension'],
         ],
     ];
 
+
     public string $customInputTemplateDir = '';
     public array $extraPropertiesConfig = [];
+    
 }

@@ -15,6 +15,9 @@ use yii\base\InvalidConfigException;
  */
 class PropertiesModel extends Model
 {
+
+    private Model $settings;
+
     // The properties field configuration as entered via the field settings
     public array $propertiesFieldConfig = [];
 
@@ -30,6 +33,8 @@ class PropertiesModel extends Model
      */
     public function __construct($config = [])
     {
+        $this->settings = PropertiesFieldPlugin::getInstance()->getSettings();
+
         foreach ($config['propertiesFieldConfig'] as $propertyConfig) {
             if ($propertyConfig['type'] === 'date' && isset($config['properties'][$propertyConfig['handle']])) {
                 $config['properties'][$propertyConfig['handle']] =
@@ -108,6 +113,8 @@ class PropertiesModel extends Model
     /**
      * Get the normalized value of a property, depending on the type
      *
+     * TODO: Find a better way to handle this, also for custom property types
+     *
      * @param $type
      * @param mixed $value
      * @return array|\craft\base\ElementInterface[]|Asset|Entry|mixed|string|null
@@ -115,14 +122,13 @@ class PropertiesModel extends Model
      */
     private function getNormalizedValue($type, mixed $value): mixed
     {
-        return match ($type) {
-            'entry' => $value ? Entry::findOne($value) : null,
-            'entries' => $value ? Entry::find()->id($value)->all() : [],
-            'asset' => $value ? Asset::findOne($value) : null,
-            'assets' => $value ? Asset::find()->id($value)->all() : [],
-            'date' => $value ? Craft::$app->getFormatter()->asDate($value, PropertiesFieldPlugin::getInstance()->getSettings()->dateFormat) : '',
-            default => $value,
-        };
+        $callback = $this->settings[$type]['normalize'] ?? null;
+
+        if ($callback) {
+            return call_user_func($callback, $value);
+        }
+
+        return $value;
     }
 
     /**
@@ -152,4 +158,53 @@ class PropertiesModel extends Model
 
         return 'text';
     }
+
+
+    public function normalizeEntry($value): ?Entry
+    {
+        return $value ? Entry::findOne($value): null;
+    }
+    public function normalizeEntries($value): array
+    {
+        return $value ? Entry::find()->id($value)->all() : [];
+    }
+
+    public function normalizeAsset($value): ?Asset
+    {
+        return $value ? Asset::findOne($value): null;
+    }
+    public function normalizeAssets($value): array
+    {
+        return $value ? Asset::find()->id($value)->all() : [];
+    }
+
+    public function normalizeDate($value): string
+    {
+        return $value ? Craft::$app->getFormatter()->asDate($value, PropertiesFieldPlugin::getInstance()->getSettings()->dateFormat) : '';
+    }
+
+    public function normalizeExtendedBoolean($value): string
+    {
+        $string = $value['isOn'] ? Craft::t('_properties-field', 'Yes') : Craft::t('_properties-field', 'No');
+
+        if ($value['comment']) {
+            $string .= ' (' . $value['comment'] . ')';
+        }
+
+        return $string;
+    }
+
+    public function normalizeDimension($value): string
+    {
+        if (!$value || !$value['quantity']) {
+            return '';
+        }
+        $string = $value['quantity'] ?? '';
+        if ($value['unit']) {
+            $string .= ' ' . $value['unit'];
+        }
+
+        return $string;
+    }
+
 }

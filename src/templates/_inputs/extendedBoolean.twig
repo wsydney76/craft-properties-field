@@ -3,7 +3,7 @@
 <div style="padding: 16px 8px 8px 8px; display: flex; align-items: center">
     {{ forms.lightswitch({
         name: "#{propertyConfig.handle}[isOn]",
-        on: properties[propertyConfig.handle]['isOn'] ?? '',
+        on: value['isOn'] ?? '',
     }) }}
 
     {{ forms.text({
@@ -11,6 +11,6 @@
         label: 'Comment',
         class: 'text-combined text-margin',
         placeholder: 'Comment',
-        value: properties[propertyConfig.handle]['comment'] ?? ''
+        value: value['comment'] ?? ''
     }) }}
 </div>

@@ -37,7 +37,7 @@ ddev craft plugin/install _properties-field
 Fill a gap in Craft CMS for a field type that allows you to define a set of properties for an element.
 
 While the table field in static rows mode lacks support for restructuring content and different field types, the matrix
-field doesn't provide a good UX for this purpose.
+field doesn't provide a good UX for this purpose. Craft also has limited support for organizing a field layout in real columns.
 
 This is an extended version of a plugin used for years in a private project, updated to support more field types and
 Craft 5 features.
@@ -53,6 +53,8 @@ Work in progress.
 ![Field input](field-input.jpg)
 
 ![Field settings](field-settings.jpg)
+
+![Columns settings](column.jpg)
 
 ````json
 {
