@@ -85,5 +85,6 @@ class Settings extends Model
         ],
     ];
 
+    public string $customInputTemplateDir = '';
     public array $extraPropertiesConfig = [];
 }

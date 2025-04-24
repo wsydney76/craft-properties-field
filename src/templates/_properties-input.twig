@@ -39,11 +39,11 @@
 
                     {% set template = settings.extraPropertiesConfig[propertyConfig.type].template ?? settings.propertiesConfig[propertyConfig.type].template %}
 
-                    {% include template ignore missing with {
-                    	propertyConfig,
-                        value: properties[propertyConfig.handle],
+                    {{ craft.app.view.renderTemplate(template, {
+                        propertyConfig,
+                        value: properties[propertyConfig.handle] ?? null,
                         settings
-                    }  only %}
+                    }, 'cp')|raw }}
 
                 </td>
             </tr>

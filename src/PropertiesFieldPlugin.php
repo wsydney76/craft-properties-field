@@ -9,7 +9,9 @@ use craft\db\Query;
 use craft\elements\db\EntryQuery;
 use craft\events\DefineBehaviorsEvent;
 use craft\events\RegisterComponentTypesEvent;
+use craft\events\RegisterTemplateRootsEvent;
 use craft\services\Fields;
+use craft\web\View;
 use wsydney76\propertiesfield\behaviors\EntryQueryBehavior;
 use wsydney76\propertiesfield\fields\Properties;
 use wsydney76\propertiesfield\models\Settings;
@@ -49,6 +51,19 @@ class PropertiesFieldPlugin extends Plugin
                 function(DefineBehaviorsEvent $event) {
                     $event->behaviors[] = EntryQueryBehavior::class;
                 });
+
+            if ($this->settings->customInputTemplateDir) {
+
+                Event::on(
+                    View::class,
+                    View::EVENT_REGISTER_CP_TEMPLATE_ROOTS,
+                    function(RegisterTemplateRootsEvent $event) {
+                        $dir = $this->settings->customInputTemplateDir;
+                        $event->roots[$dir] = Craft::getAlias('@templates') . '/' . $dir;
+                    }
+                );
+            }
+
         });
     }
 
