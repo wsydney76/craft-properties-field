@@ -136,6 +136,8 @@ Examples:
 ```php
 <?php
 
+// config/_properties-field.php
+
 return [
     'customInputTemplateDir' => '_properties-field-inputs',
     'extraPropertiesConfig' => [
