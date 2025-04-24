@@ -1,0 +1,10 @@
+{% import '_includes/forms.twig' as forms %}
+
+<div style="padding: 16px 8px 8px 8px">
+    {{ forms.lightswitch({
+        name: propertyConfig.handle,
+        type: propertyConfig.type,
+        on: value ?? '',
+        placeholder: propertyConfig.placeholder ?? ''
+    }) }}
+</div>

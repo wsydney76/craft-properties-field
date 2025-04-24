@@ -1,0 +1,39 @@
+{% import '_includes/forms.twig' as forms %}
+
+{% if not propertyConfig.options %}
+    {% exit 403 "No source provided" %}
+{% endif %}
+
+{% set value = value ?? null %}
+
+{% if propertyConfig.type == 'entry' or propertyConfig.type == 'entries' %}
+    {% set sectionHandles = propertyConfig.options|split(',') %}
+    {% set sources = sectionHandles|map(handle => "section:#{craft.app.entries.sectionByHandle(handle).uid}") %}
+    {% set elementType = 'craft\\elements\\Entry' %}
+    {% set elements = value ? craft.entries.id(value).all : [] %}
+    {% set isSingle = propertyConfig.type == 'entry' %}
+    {% set viewMode = settings.entriesViewMode %}
+{% endif %}
+
+{% if propertyConfig.type == 'asset' or propertyConfig.type == 'assets' %}
+    {% set volumeHandles = propertyConfig.options|split(',') %}
+    {% set sources = volumeHandles|map(handle => "volume:#{craft.app.volumes.volumeByHandle(handle).uid}") %}
+    {% set elementType = 'craft\\elements\\Asset' %}
+    {% set elements = value ? craft.assets.id(value).all : [] %}
+    {% set isSingle = propertyConfig.type == 'asset' %}
+    {% set viewMode = settings.assetsViewMode %}
+{% endif %}
+
+<div style="padding: 8px;">
+
+    {{ forms.elementSelect({
+        name: propertyConfig.handle,
+        elements: elements,
+        elementType: elementType,
+        single: isSingle,
+        viewMode: viewMode,
+        showCardsInGrid: true,
+        sources: sources
+    }) }}
+
+</div>

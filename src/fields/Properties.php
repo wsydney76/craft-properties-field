@@ -13,6 +13,7 @@ use craft\helpers\StringHelper;
 use wsydney76\propertiesfield\models\PropertiesModel;
 use wsydney76\propertiesfield\PropertiesFieldPlugin;
 use yii\db\Schema;
+use function array_merge;
 use function is_array;
 use function is_string;
 
@@ -94,6 +95,9 @@ class Properties extends Field implements RelationalFieldInterface
      */
     public function getSettingsHtml(): ?string
     {
+        $settings = PropertiesFieldPlugin::getInstance()->getSettings();
+
+        $options = array_merge($settings->propertiesConfig, $settings->extraPropertiesConfig);
         return Cp::editableTableFieldHtml([
             'label' => Craft::t('_properties-field', 'Properties Configuration'),
             'instructions' => Craft::t('_properties-field', 'Options for select: one option per line, in the format value:label<br>Options for entries/assets: section/volume handles, comma separated'),
@@ -114,23 +118,7 @@ class Properties extends Field implements RelationalFieldInterface
                     'heading' => Craft::t('_properties-field', 'Type'),
                     'type' => 'select',
                     'class' => 'code',
-                    'options' => [
-                        ['label' => 'Text', 'value' => 'text'],
-                        ['label' => 'Text Area', 'value' => 'textarea'],
-                        ['label' => 'Number', 'value' => 'number'],
-                        ['label' => 'Email', 'value' => 'email'],
-                        ['label' => 'Boolean', 'value' => 'boolean'],
-                        ['label' => 'Date', 'value' => 'date'],
-//                        ['label' => 'Time', 'value' => 'time'],
-                        ['label' => 'Select', 'value' => 'select'],
-                        ['label' => 'Entry (Single)', 'value' => 'entry'],
-                        ['label' => 'Entry (Multi)', 'value' => 'entries'],
-                        ['label' => 'Asset (Single)', 'value' => 'asset'],
-                        ['label' => 'Asset (Multi)', 'value' => 'assets'],
-                        ['label' => 'Boolean with comment', 'value' => 'extendedBoolean'],
-                        ['label' => 'Dimension', 'value' => 'dimension'],
-//                        ['label' => 'Multi-select', 'value' => 'multiselect'],
-                    ],
+                    'options' => $options,
                     'width' => '10%',
                 ],
                 'options' => ['heading' => Craft::t('_properties-field', 'Options'), 'type' => 'multiline'],
@@ -176,6 +164,7 @@ class Properties extends Field implements RelationalFieldInterface
      */
     protected function inputHtml(mixed $value, ?ElementInterface $element, bool $inline): string
     {
+
         return Craft::$app->getView()->renderTemplate('_properties-field/_properties-input', [
             'field' => $this,
             'properties' => $value->properties,

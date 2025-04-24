@@ -1,0 +1,9 @@
+{% import '_includes/forms.twig' as forms %}
+
+ {{ forms.textArea({
+     name: propertyConfig.handle,
+     value: value ?? '',
+     placeholder: propertyConfig.placeholder ?? '',
+     rows: 2,
+     class: 'nicetext',
+ }) }}

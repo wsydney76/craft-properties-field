@@ -1,0 +1,8 @@
+{% import '_includes/forms.twig' as forms %}
+
+{{ forms.date({
+    name: propertyConfig.handle,
+    type: propertyConfig.type,
+    value: value ?? '',
+    placeholder: propertyConfig.placeholder ?? ''
+}) }}

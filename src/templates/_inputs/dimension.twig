@@ -1,0 +1,23 @@
+{% import '_includes/forms.twig' as forms %}
+
+<div style="padding: 16px 8px 8px 8px; display: flex; align-items: center">
+    <div>
+        {{ forms.textField({
+            name: "#{propertyConfig.handle}[quantity]",
+            label: 'Quantity',
+            type: 'number',
+            class: 'text-combined',
+            value: value['quantity'] ?? ''
+        }) }}
+    </div>
+
+    <div>
+        {{ forms.textField({
+            name: "#{propertyConfig.handle}[unit]",
+            label: 'Unit',
+            class: 'text-combined text-margin',
+            value: value['unit'] ?? '',
+            first: true
+        }) }}
+    </div>
+</div>
