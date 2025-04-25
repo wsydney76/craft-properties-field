@@ -3,6 +3,5 @@
 {{ forms.date({
     name: propertyConfig.handle,
     type: propertyConfig.type,
-    value: value ?? '',
-    placeholder: propertyConfig.placeholder ?? ''
-}) }}
+    value: value ?? ''
+}|merge(propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {})) }}

@@ -15,7 +15,6 @@
     {{ forms.select({
         name: propertyConfig.handle,
         value: value ?? '',
-        placeholder: propertyConfig.placeholder ?? '',
         options: options,
-    }) }}
+    }|merge(propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {})) }}
 </div>

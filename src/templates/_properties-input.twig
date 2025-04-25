@@ -22,31 +22,39 @@
 
         <tbody>
         {% for propertyConfig in propertiesFieldConfig %}
-            <tr>
-                <th class="heading-cell thin" style="text-align: left; padding: 7px;">
-                    {{ propertyConfig.name|t }}
-                    {% if propertyConfig.instructions ?? null %}
-                        <span class="info">
+            {% if propertyConfig.type == 'groupHeader' %}
+                <tr>
+                    <th colspan="2" class="group-header">
+                        {{ propertyConfig.name }}
+                    </th>
+                </tr>
+            {% else %}
+                <tr>
+                    <th class="heading-cell thin" style="text-align: left; padding: 7px;">
+                        {{ propertyConfig.name|t }}
+                        {% if propertyConfig.instructions ?? null %}
+                            <span class="info">
                             {{ propertyConfig.instructions|t }}
                         </span>
-                    {% endif %}
-                    {% if propertyConfig.required ?? false %}
-                        <span class="required"></span>
-                    {% endif %}
-                </th>
+                        {% endif %}
+                        {% if propertyConfig.required ?? false %}
+                            <span class="required"></span>
+                        {% endif %}
+                    </th>
 
-                <td class="singleline-cell textual">
+                    <td class="singleline-cell textual">
 
-                    {% set template = settings.extraPropertiesConfig[propertyConfig.type].template ?? settings.propertiesConfig[propertyConfig.type].template %}
+                        {% set template = settings.extraPropertiesConfig[propertyConfig.type].template ?? settings.propertiesConfig[propertyConfig.type].template %}
 
-                    {{ craft.app.view.renderTemplate(template, {
-                        propertyConfig,
-                        value: properties[propertyConfig.handle] ?? null,
-                        settings
-                    }, 'cp')|raw }}
+                        {{ craft.app.view.renderTemplate(template, {
+                            propertyConfig,
+                            value: properties[propertyConfig.handle] ?? null,
+                            settings
+                        }, 'cp')|raw }}
 
-                </td>
-            </tr>
+                    </td>
+                </tr>
+            {% endif %}
         {% endfor %}
         </tbody>
     </table>
@@ -57,7 +65,17 @@
 .text-combined {
     border: 1px solid gray !important;
 }
+
 .text-margin {
     margin-left: 8px;
+}
+
+.group-header {
+    font-weight: 700 !important;
+
+    background-color: var(--gray-100) !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 8px 0;
 }
 {% endcss %}

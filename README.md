@@ -10,6 +10,10 @@ This plugin is tested with Craft CMS 5.7, and PHP 8.3.
 
 Add to `composer.json` file in your project root to require this plugin:
 
+Use version `^1.0.0-beta.1` for 'official' releases, or `dev-main` for the latest development version, where anything can go wrong.
+
+
+
 ```json
 {
   "require": {
@@ -46,15 +50,30 @@ These additions require a beta version of the plugin to be released, as they are
 
 No warranty is given, and no support is provided.
 
-Work in progress.
+Work in progress. Not tested in a multi-site environment.
 
 ## Screenshots
+
+### Standard fields
 
 ![Field input](field-input.jpg)
 
 ![Field settings](field-settings.jpg)
 
+### Use in a matrix block
+
 ![Columns settings](column.jpg)
+
+### Group headers and multi-sub-fields properties
+
+![Field input](field-input2.jpg)
+![Field settings](field-settings2.jpg)
+
+(This kind of setup is actially one of the main use cases for this plugin, as it allows to add/remove/rearrange properties consistently without creating a myriad of fields/matrix blocks.)
+
+## Storage
+
+The field stores the data posted from the edit form "as-is" in a JSON field (just date fields are converted to ISO format).
 
 ````json
 {
@@ -104,6 +123,7 @@ A list of properties to be displayed in the field. Each property has the followi
 * Instructions: Instructions for the property, displayed in a popup via an `info` icon
 * Required: Whether the property is required
 * Type: The type of the property. The following types are supported:
+    * Group header: A group header text
     * Text: A single line text field
     * Textarea: A multi-line text field
     * Number: A number field
@@ -119,6 +139,12 @@ A list of properties to be displayed in the field. Each property has the followi
     * Select: A list of options for the select field, in the format `value:label`
     * Entry/Entries: A comma-separated list of section handles
     * Asset/Assets:  A comma-separated list of volume handles
+* Field Config: A JSON string with additional field config settings.
+  This is merged into the field config object of the corresponding Craft forms macro, so you can use any settings supported by the field type. For example:
+    * `{"placeholder": "placeholder text"}` for a text fields
+    * `{"offLabel": "labelText","onLabel": "labelText"}` for a boolean field
+    * `{"min": 0,"max": 100,"step": 5}` for a number field
+  Supported for text/email/number, textarea, boolean, select, date, entries/assets property types.
 
 ## Limitations
 
@@ -126,6 +152,10 @@ A list of properties to be displayed in the field. Each property has the followi
 * Does not support all possible field settings
 * Craft is not aware of sub-fields, so the whole field is marked as updated on changes, and a translation method can
   only be used for the whole field, not for sub-fields.
+* No out-of-the-box validation for sub-fields.
+* No fancy UI for extended sub-field settings.
+* Does not support conditional logic.
+* No intelligent support for search (yet). For now, the stringified JSON field is thrown into the search index.
 
 ## Extending
 
@@ -235,7 +265,7 @@ Anything that is posted from fields is stored 'as is' in the database json field
 
 ## Templating
 
-The field value is an instance of `wsydney76\propertiesfield\models\PropertiesModel`
+The field value is an instance of `wsydney76\propertiesfield\models\PropertiesModel` (or null if not set).
 
 Access the properties directly:
 
@@ -304,9 +334,14 @@ Entries can be queried via the `hasProp()` entry query method:
     .hasProp('person', 'personalData', 'age', '33')
 .all %}
 
+{% set entries = craft.entries
+    .hasProp('propertyTest2', 'skills', 'vue.isOn', '1')
+.all
+%}
+
 ```
 
-TODO: Allow querying for sub-keys.
+TODO: Allow querying for items in arrays (for entries/assets).
 
 The `Entry/Entries/Asset/Assets` sub-field types establish a relation, that can be queried via the `relatedTo` query
 param
@@ -329,9 +364,12 @@ This does not differentiate between the different sub-fields, so all entries sel
 * 'Dimension' property type
 * Allow customization of property types
 * Load input field templates for property types dynamically
+* Group Header property type
+* Field config settings
 
 ### Todo:
 
 * Support 'required' setting for combined fields
 * Support 'normalizedValue' for combined fields
+* Better support for building the search index
 

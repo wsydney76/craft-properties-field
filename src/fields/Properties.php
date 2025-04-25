@@ -70,23 +70,31 @@ class Properties extends Field implements RelationalFieldInterface
         ]);
     }
 
-  public function checkConfig($attribute): void
-  {
-      $handles = [];
-      foreach ($this->propertiesFieldConfig as $i => $fieldConfig) {
-          if (empty($fieldConfig['handle'])) {
-              $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Handle cannot be blank.'));
-          } elseif (in_array($fieldConfig['handle'], $handles, true)) {
-              $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Handle must be unique.'));
-          } else {
-              $handles[] = $fieldConfig['handle'];
-          }
+    public function checkConfig($attribute): void
+    {
+        $handles = [];
+        foreach ($this->propertiesFieldConfig as $i => $fieldConfig) {
+            if (empty($fieldConfig['handle'])) {
+                $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Handle cannot be blank.'));
+            } elseif (in_array($fieldConfig['handle'], $handles, true)) {
+                $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Handle must be unique.'));
+            } else {
+                $handles[] = $fieldConfig['handle'];
+            }
 
-          if (empty($fieldConfig['name'])) {
-              $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Name cannot be blank.'));
-          }
-      }
-  }
+            if (empty($fieldConfig['name'])) {
+                $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Name cannot be blank.'));
+            }
+
+            if (!empty($fieldConfig['fieldConfig'])) {
+                // Check if fieldConfig is a valid JSON string
+                $isValidJson = json_decode($fieldConfig['fieldConfig'], true);
+                if ($isValidJson === null) {
+                    $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Field Config must be a valid JSON string.'));
+                }
+            }
+        }
+    }
 
     /**
      * The HTML for the field settings in the control panel.
@@ -111,7 +119,6 @@ class Properties extends Field implements RelationalFieldInterface
             'cols' => [
                 'name' => ['heading' => Craft::t('_properties-field', 'Name'), 'type' => 'singleline'],
                 'handle' => ['heading' => Craft::t('_properties-field', 'Handle'), 'type' => 'singleline', 'class' => 'code'],
-                'placeholder' => ['heading' => Craft::t('_properties-field', 'Placeholder'), 'type' => 'singleline', 'class' => 'code'],
                 'instructions' => ['heading' => Craft::t('_properties-field', 'Instructions'), 'type' => 'singleline'],
                 'required' => ['heading' => Craft::t('_properties-field', 'Required'), 'type' => 'lightswitch'],
                 'type' => [
@@ -122,6 +129,8 @@ class Properties extends Field implements RelationalFieldInterface
                     'width' => '10%',
                 ],
                 'options' => ['heading' => Craft::t('_properties-field', 'Options'), 'type' => 'multiline'],
+                'fieldConfig' => ['heading' => Craft::t('_properties-field', 'Field Config'), 'type' => 'multiline'],
+
             ],
             'rows' => $this->propertiesFieldConfig,
             'errors' => $this->getErrors('propertiesFieldConfig'),

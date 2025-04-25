@@ -3,7 +3,6 @@
  {{ forms.textArea({
      name: propertyConfig.handle,
      value: value ?? '',
-     placeholder: propertyConfig.placeholder ?? '',
      rows: 2,
      class: 'nicetext',
- }) }}
+ }|merge(propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {})) }}

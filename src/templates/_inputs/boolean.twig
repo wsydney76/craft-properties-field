@@ -4,7 +4,6 @@
     {{ forms.lightswitch({
         name: propertyConfig.handle,
         type: propertyConfig.type,
-        on: value ?? '',
-        placeholder: propertyConfig.placeholder ?? ''
-    }) }}
+        on: value ?? ''
+    }|merge(propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {})) }}
 </div>

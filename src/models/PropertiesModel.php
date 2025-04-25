@@ -122,7 +122,7 @@ class PropertiesModel extends Model
      */
     private function getNormalizedValue($type, mixed $value): mixed
     {
-        $callback = $this->settings[$type]['normalize'] ?? null;
+        $callback = $this->settings->propertiesConfig [$type]['normalize'] ?? null;
 
         if ($callback) {
             return call_user_func($callback, $value);
@@ -185,6 +185,10 @@ class PropertiesModel extends Model
 
     public function normalizeExtendedBoolean($value): string
     {
+        if (!$value) {
+            return '';
+        }
+
         $string = $value['isOn'] ? Craft::t('_properties-field', 'Yes') : Craft::t('_properties-field', 'No');
 
         if ($value['comment']) {

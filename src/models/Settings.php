@@ -90,6 +90,10 @@ class Settings extends Model
             'template' => '_properties-field/_inputs/dimension.twig',
             'normalize' => [PropertiesModel::class, 'normalizeDimension'],
         ],
+        'groupHeader' => [
+            'label' => 'Group Header',
+            'type' => 'groupHeader'
+        ],
     ];
 
 
