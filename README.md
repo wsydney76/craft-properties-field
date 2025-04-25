@@ -75,7 +75,7 @@ Work in progress. Not tested in a multi-site environment.
 
 The field stores the data posted from the edit form "as-is" in a JSON field (just date fields are converted to ISO format).
 
-This means that all values are stored as strings, including numbers and element ids. Lightswitche values are stored as `"1"` or `""`.
+This means that all values are stored as strings, including numbers and element ids. Lightswitch values are stored as `"1"` or `""`.
 
 ````json
 {
