@@ -69,7 +69,7 @@ Work in progress. Not tested in a multi-site environment.
 ![Field input](field-input2.jpg)
 ![Field settings](field-settings2.jpg)
 
-(This kind of setup is actially one of the main use cases for this plugin, as it allows to add/remove/rearrange properties consistently without creating a myriad of fields/matrix blocks.)
+(This kind of setup is actually one of the main use cases for this plugin, as it allows to add/remove/rearrange properties consistently without creating a myriad of fields/matrix blocks.)
 
 ## Storage
 
@@ -282,6 +282,8 @@ entry.fieldHandle.properties['handle']
 However, this is not recommended, as this reflects the raw database content, where props may be missing or in a wrong
 order, e.g. when the field config was updated after an entry was saved.
 
+So always code defensively and check for the existence of a property before using it.
+
 Loop over all properties:
 
 ```twig
@@ -315,10 +317,13 @@ Each property is an array with the following keys:
     * `entries/assets`: An array of elements (or empty array)
     * `other`: The raw value
 
-The config is available via the `config` property:
+The config is available via the `propertiesFieldConfig` property:
 
 ```twig
 entry.fieldHandle.propertiesFieldConfig
+
+craft.app.fields.byHandle('fieldHandle').propertiesFieldConfig
+
 ```
 
 A single property can be accessed via the sub-field handle:
