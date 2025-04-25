@@ -75,6 +75,8 @@ Work in progress. Not tested in a multi-site environment.
 
 The field stores the data posted from the edit form "as-is" in a JSON field (just date fields are converted to ISO format).
 
+This means that all values are stored as strings, including numbers and element ids. Lightswitche values are stored as `"1"` or `""`.
+
 ````json
 {
   "2563c798-42f7-493c-9bb8-9465a8355a72": {
@@ -140,10 +142,12 @@ A list of properties to be displayed in the field. Each property has the followi
     * Entry/Entries: A comma-separated list of section handles
     * Asset/Assets:  A comma-separated list of volume handles
 * Field Config: A JSON string with additional field config settings.
+
   This is merged into the field config object of the corresponding Craft forms macro, so you can use any settings supported by the field type. For example:
-    * `{"placeholder": "placeholder text"}` for a text fields
+    * `{"placeholder": "placeholder text"}` for a text field
     * `{"offLabel": "labelText","onLabel": "labelText"}` for a boolean field
     * `{"min": 0,"max": 100,"step": 5}` for a number field
+  
   Supported for text/email/number, textarea, boolean, select, date, entries/assets property types.
 
 ## Limitations
