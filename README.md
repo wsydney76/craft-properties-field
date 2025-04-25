@@ -30,9 +30,10 @@ Use version `^1.0.0-beta.1` for 'official' releases, or `dev-main` for the lates
 }
 ```
 
-Then run the following command to install the plugin:
+Then run the following commands to install the plugin:
 
 ```bash
+ddev composer update
 ddev craft plugin/install _properties-field
 ```
 
