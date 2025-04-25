@@ -137,10 +137,12 @@ A list of properties to be displayed in the field. Each property has the followi
     * Asset/Assets: An assets field with one or multiple assets
     * Boolean with comment: A boolean field combined with a comment field (experimental)
     * Dimension: Combines a number field with a text field for the unit (experimental)
+    * Dynamic property set.
 * Options: The options for the field. The following options are supported:
     * Select: A list of options for the select field, in the format `value:label`
     * Entry/Entries: A comma-separated list of section handles
     * Asset/Assets:  A comma-separated list of volume handles
+    * Dynamic property set: The slug of the entry that holds the property set. See 'Dynamic property config' below.
 * Field Config: A JSON string with additional field config settings.
 
   This is merged into the field config object of the corresponding Craft forms macro, so you can use any settings supported by the field type. For example:
@@ -149,6 +151,29 @@ A list of properties to be displayed in the field. Each property has the followi
     * `{"min": 0,"max": 100,"step": 5}` for a number field
   
   Supported for text/email/number, textarea, boolean, select, date, entries/assets property types.
+
+
+## Dynamic property config
+
+Experimental, work in progress.
+
+Updating the property types config in a custom field settings updates the project config, which means that a deployment action is needed to get this 'live'.
+
+This will fit in most cases, especially when updating the config also requires changes in your templates.
+
+However, sometimes a more dynamic approach is needed, allowing privileged editors to change the property config in the database without touching the project config.
+
+Take the 'Skills' example from the screenshots above. This is a list of skills that can be added/removed/rearranged by the editor, and can be output via a generic template.
+
+Experimental approach:
+
+* Create a new section/entry type with a field layout containing a `propertiesConfig` table field.
+* This field matches the field settings, a yaml file is included in the plugin's config folder as a starting point.
+  * Copy to `config/project/fields`
+  * Run `ddev craft project-config/apply` to update the project config.
+* Create a new entry in this section, and add the properties you want to use.
+* In the fields settings, create a property type with the type `Dynamic property set` and the slug of the entry that holds the property set.
+* This will load the configs from the entry and insert them at that position.
 
 ## Limitations
 
@@ -375,6 +400,7 @@ This does not differentiate between the different sub-fields, so all entries sel
 * Load input field templates for property types dynamically
 * Group Header property type
 * Field config settings
+* Experimental, wip: Support for dynamic property config
 
 ### Todo:
 

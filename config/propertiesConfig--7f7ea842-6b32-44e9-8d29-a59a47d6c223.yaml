@@ -1,0 +1,153 @@
+columnSuffix: null
+handle: propertiesConfig
+instructions: null
+name: 'Properties Config'
+searchable: false
+settings:
+  addRowLabel: 'Add a property config'
+  columns:
+    __assoc__:
+      -
+        - col1
+        -
+          __assoc__:
+            -
+              - heading
+              - Name
+            -
+              - handle
+              - name
+            -
+              - width
+              - ''
+            -
+              - type
+              - singleline
+      -
+        - col2
+        -
+          __assoc__:
+            -
+              - heading
+              - Handle
+            -
+              - handle
+              - handle
+            -
+              - width
+              - ''
+            -
+              - type
+              - singleline
+      -
+        - col3
+        -
+          __assoc__:
+            -
+              - heading
+              - Instructions
+            -
+              - handle
+              - instructions
+            -
+              - width
+              - ''
+            -
+              - type
+              - singleline
+      -
+        - col4
+        -
+          __assoc__:
+            -
+              - heading
+              - Required
+            -
+              - handle
+              - required
+            -
+              - width
+              - ''
+            -
+              - type
+              - lightswitch
+      -
+        - col5
+        -
+          __assoc__:
+            -
+              - heading
+              - Type
+            -
+              - handle
+              - type
+            -
+              - width
+              - ''
+            -
+              - type
+              - select
+            -
+              - options
+              -
+                -
+                  __assoc__:
+                    -
+                      - label
+                      - 'Group Header'
+                    -
+                      - value
+                      - groupHeader
+                    -
+                      - default
+                      - false
+                -
+                  __assoc__:
+                    -
+                      - label
+                      - 'Boolean with comment'
+                    -
+                      - value
+                      - extendedBoolean
+                    -
+                      - default
+                      - false
+      -
+        - col6
+        -
+          __assoc__:
+            -
+              - heading
+              - Options
+            -
+              - handle
+              - options
+            -
+              - width
+              - ''
+            -
+              - type
+              - multiline
+      -
+        - col7
+        -
+          __assoc__:
+            -
+              - heading
+              - 'Field Config'
+            -
+              - handle
+              - fieldConfig
+            -
+              - width
+              - ''
+            -
+              - type
+              - singleline
+  defaults: null
+  maxRows: null
+  minRows: null
+  staticRows: false
+translationKeyFormat: null
+translationMethod: none
+type: craft\fields\Table

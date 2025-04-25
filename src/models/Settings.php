@@ -94,6 +94,10 @@ class Settings extends Model
             'label' => 'Group Header',
             'type' => 'groupHeader'
         ],
+        'set' => [
+            'label' => 'Dynamic Property Set',
+            'type' => 'set'
+        ],
     ];
 
 

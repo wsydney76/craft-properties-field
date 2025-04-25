@@ -144,19 +144,19 @@ class Properties extends Field implements RelationalFieldInterface
     public function normalizeValue(mixed $value, ?ElementInterface $element): mixed
     {
         if ($value instanceof PropertiesModel) {
-            $value->propertiesFieldConfig = $this->propertiesFieldConfig;
+            $value->propertiesFieldConfig = $this->expandPropertySet($this->propertiesFieldConfig);
             return $value;
         }
 
         if (is_array($value)) {
             return new PropertiesModel([
                 'properties' => $value,
-                'propertiesFieldConfig' => $this->propertiesFieldConfig,
+                'propertiesFieldConfig' => $this->expandPropertySet($this->propertiesFieldConfig),
             ]);
         }
 
 
-        return new PropertiesModel(['propertiesFieldConfig' => $this->propertiesFieldConfig]);
+        return new PropertiesModel(['propertiesFieldConfig' => $this->expandPropertySet($this->propertiesFieldConfig)]);
     }
 
 
@@ -177,7 +177,7 @@ class Properties extends Field implements RelationalFieldInterface
         return Craft::$app->getView()->renderTemplate('_properties-field/_properties-input', [
             'field' => $this,
             'properties' => $value->properties,
-            'propertiesFieldConfig' => $value->propertiesFieldConfig,
+            'propertiesFieldConfig' => $this->expandPropertySet($value->propertiesFieldConfig),
             'element' => $element,
             'settings' => PropertiesFieldPlugin::getInstance()->getSettings(),
         ]);
@@ -263,5 +263,35 @@ class Properties extends Field implements RelationalFieldInterface
         }
 
         return $ids;
+    }
+
+    private function expandPropertySet($propertiesFieldConfig)
+    {
+        $newConfig = [];
+        foreach ($propertiesFieldConfig as $i => $config) {
+            if ($config['type'] == 'set') {
+                $setEntry = Entry::find()
+                    ->slug($config['options'])
+                    ->one();
+                if ($setEntry) {
+                    $extraConfigs = $setEntry->propertiesConfig;
+                    foreach ($extraConfigs as $extraConfig) {
+                        $newConfig[] = [
+                            'name' => $extraConfig['name'] ?? '',
+                            'handle' => $extraConfig['handle'] ?? '',
+                            'instructions' => $extraConfig['instructions'] ?? '',
+                            'required' => $extraConfig['required'] ?? false,
+                            'type' => $extraConfig['type'] ?? '',
+                            'options' => $extraConfig['options'] ?? '',
+                            'fieldConfig' => $extraConfig['fieldConfig'] ?? '',
+                        ];
+                    }
+                }
+            } else {
+                $newConfig[] = $config;
+            }
+        }
+
+        return $newConfig;
     }
 }
