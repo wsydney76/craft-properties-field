@@ -114,15 +114,14 @@ This means that all values are stored as strings, including numbers and element 
 * Show header: Whether to show a columns header in the CP. Defaults to `false`
 * Date output format. Defaults to `short`
 * Entries/Assets view mode. Defaults to `cards`
-* Custom input template directory. See Extendingsection for more details.
+* Custom input template directory. See Extending section for more details.
 
 ### Field settings
 
 A list of properties to be displayed in the field. Each property has the following settings:
 
 * Name: The name of the property
-* Handle: The handle of the property
-* Placeholder: The placeholder for text properties
+* Handle: The handle of the property (will be built from the name if not set)
 * Instructions: Instructions for the property, displayed in a popup via an `info` icon
 * Required: Whether the property is required
 * Type: The type of the property. The following types are supported:
@@ -138,7 +137,7 @@ A list of properties to be displayed in the field. Each property has the followi
     * Asset/Assets: An assets field with one or multiple assets
     * Boolean with comment: A boolean field combined with a comment field (experimental)
     * Dimension: Combines a number field with a text field for the unit (experimental)
-    * Dynamic property set.
+    * Dynamic property set. See 'Dynamic property config' below.
 * Options: The options for the field. The following options are supported:
     * Select: A list of options for the select field, in the format `value:label`
     * Entry/Entries: A comma-separated list of section handles
@@ -152,6 +151,8 @@ A list of properties to be displayed in the field. Each property has the followi
     * `{"min": 0,"max": 100,"step": 5}` for a number field
   
   Supported for text/email/number, textarea, boolean, select, date, entries/assets property types.
+  
+  TODO: Take these settings into account when validating the field.
 
 
 ## Dynamic property config
@@ -308,7 +309,7 @@ entry.fieldHandle.properties['handle']
 However, this is not recommended, as this reflects the raw database content, where props may be missing or in a wrong
 order, e.g. when the field config was updated after an entry was saved.
 
-So always code defensively and check for the existence of a property before using it.
+So always code defensively and check for the existence or type of property before using it.
 
 Loop over all properties:
 
@@ -331,6 +332,31 @@ Loop over all properties:
 {% endfor %}    
 ```
 
+Ignore empty properties: 
+
+This is especially helpful if new properties are added to the field config, and explicit values are not yet saved.
+
+```twig
+{% for prop in props.getNormalizedProperties({ignoreEmpty: true}) %}
+   ...
+{% endfor %}    
+```
+
+TODO: Check, what 'empty' means for the different property types. This may not work currently as expected for all property types.
+
+Alternatively, you can check the raw value of the property, `prop.value` will be `null` if the property is not in the database.
+
+
+Or set a default value for empty properties:
+
+```twig
+{% for prop in props.getNormalizedProperties({ignoreEmpty: true, default: 'n/a'}) %}
+   ...
+{% endfor %}    
+```
+
+TODO: Check, this may throw errors if a property type does not return a string as normalized value.
+
 Each property is an array with the following keys:
 
 * `name`: The name of the property
@@ -341,6 +367,7 @@ Each property is an array with the following keys:
     * `date`: A formated date string
     * `entry/asset`: A single element (or null)
     * `entries/assets`: An array of elements (or empty array)
+    * `select`: An instance of `craft\fields\data\SingleOptionFieldData`. See Craft CMS documentation of the Dropdown field for more details.
     * `other`: The raw value
 
 The config is available via the `propertiesFieldConfig` property:
@@ -408,4 +435,5 @@ This does not differentiate between the different sub-fields, so all entries sel
 * Support 'required' setting for combined fields
 * Support 'normalizedValue' for combined fields
 * Better support for building the search index
+* Complete translations
 
