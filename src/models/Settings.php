@@ -52,7 +52,8 @@ class Settings extends Model
         'select' => [
             'label' => 'Select',
             'type' => 'select',
-            'template' => '_properties-field/_inputs/select.twig',
+            'template' => '_properties-field/_inputs/select.twig',7,
+            'normalize' => [PropertiesModel::class, 'normalizeSelect'],
         ],
         'entry' => [
             'label' => 'Entry (Single)',

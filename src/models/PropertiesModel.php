@@ -3,12 +3,18 @@
 namespace wsydney76\propertiesfield\models;
 
 use Craft;
+use craft\base\ElementInterface;
 use craft\base\Model;
 use craft\elements\Asset;
 use craft\elements\Entry;
+use craft\fields\data\SingleOptionFieldData;
 use craft\helpers\DateTimeHelper;
+use Exception;
+use wsydney76\propertiesfield\fields\Properties;
 use wsydney76\propertiesfield\PropertiesFieldPlugin;
 use yii\base\InvalidConfigException;
+use function is_string;
+use function reset;
 
 /**
  * The PropertiesModel class is used to represent the properties field model data.
@@ -23,6 +29,9 @@ class PropertiesModel extends Model
 
     // The properties field values for the current element/field
     public array $properties = [];
+
+    public ElementInterface $element;
+    public Properties $field;
 
     /**
      * Store dates in ISO 8601 format
@@ -92,7 +101,7 @@ class PropertiesModel extends Model
                 'handle' => $propertyConfig['handle'],
                 'value' => $value,
                 'type' => $propertyConfig['type'],
-                'normalizedValue' => $this->getNormalizedValue($propertyConfig['type'], $value),
+                'normalizedValue' => $this->getNormalizedValue($propertyConfig, $value),
             ];
         }
 
@@ -120,12 +129,12 @@ class PropertiesModel extends Model
      * @return array|\craft\base\ElementInterface[]|Asset|Entry|mixed|string|null
      * @throws \yii\base\InvalidConfigException
      */
-    private function getNormalizedValue($type, mixed $value): mixed
+    private function getNormalizedValue($config, mixed $value): mixed
     {
-        $callback = $this->settings->propertiesConfig [$type]['normalize'] ?? null;
+        $callback = $this->settings->propertiesConfig [$config['type']]['normalize'] ?? null;
 
         if ($callback) {
-            return call_user_func($callback, $value);
+            return call_user_func($callback, $value, $config);
         }
 
         return $value;
@@ -139,7 +148,7 @@ class PropertiesModel extends Model
      */
     public function getNormalized(string $handle): mixed
     {
-        return $this->getNormalizedValue($this->getTypeByHandle($handle), $this->get($handle));
+        return $this->getNormalizedValue($this->getPropertyConfigByHandle($handle), $this->get($handle));
     }
 
     /**
@@ -148,33 +157,55 @@ class PropertiesModel extends Model
      * @param string $handle
      * @return string
      */
-    private function getTypeByHandle(string $handle): string
+    private function getPropertyConfigByHandle(string $handle): mixed
     {
         foreach ($this->propertiesFieldConfig as $propertyConfig) {
             if ($propertyConfig['handle'] === $handle) {
-                return $propertyConfig['type'];
+                return $propertyConfig;
             }
         }
 
-        return 'text';
+        return null;
     }
 
 
-    public function normalizeEntry($value): ?Entry
+    public function normalizeEntry($value): mixed
     {
-        return $value ? Entry::findOne($value): null;
+        // This can happen if a default value is set for empty values in getNormalizedProperties()
+        if (is_string($value)) {
+            return $value;
+        }
+
+        return $value ? Entry::findOne($value) : null;
     }
-    public function normalizeEntries($value): array
+
+    public function normalizeEntries($value): mixed
     {
+        // This can happen if a default value is set for empty values in getNormalizedProperties()
+        if (is_string($value)) {
+            return $value;
+        }
+
         return $value ? Entry::find()->id($value)->all() : [];
     }
 
-    public function normalizeAsset($value): ?Asset
+    public function normalizeAsset($value): mixed
     {
-        return $value ? Asset::findOne($value): null;
+        // This can happen if a default value is set for empty values in getNormalizedProperties()
+        if (is_string($value)) {
+            return $value;
+        }
+
+        return $value ? Asset::findOne($value) : null;
     }
-    public function normalizeAssets($value): array
+
+    public function normalizeAssets($value): mixed
     {
+        // This can happen if a default value is set for empty values in getNormalizedProperties()
+        if (is_string($value)) {
+            return $value;
+        }
+
         return $value ? Asset::find()->id($value)->all() : [];
     }
 
@@ -183,8 +214,45 @@ class PropertiesModel extends Model
         return $value ? Craft::$app->getFormatter()->asDate($value, PropertiesFieldPlugin::getInstance()->getSettings()->dateFormat) : '';
     }
 
+    public function normalizeSelect($value, $config)
+    {
+        try {
+            // TODO: This is the same logic as in _inputs/select.twig, unify this
+            $options = array_map(function($option) {
+                $parts = explode(':', $option, 2);
+                return [
+                    'value' => $parts[0],
+                    'label' => count($parts) === 2 ? $parts[1] : $parts[0],
+                ];
+            }, explode("\n", str_replace("\r", '', $config['options'])));
+
+
+            // TODO: Check this AI generated code....
+            $selectedOption = array_filter($options, function($option) use ($value) {
+                return $option['value'] === $value;
+            });
+
+            // set the first selected option as the value
+            $selectedOption = reset($selectedOption);
+
+            $value = new SingleOptionFieldData($selectedOption ? $selectedOption['label'] : '', $value, !empty($selectedOption), true);
+            $value->setOptions($options);
+            return $value;
+        } catch (Exception $e) {
+
+            Craft::error($e->getMessage(), __METHOD__);
+            return $value;
+        }
+    }
+
     public function normalizeExtendedBoolean($value): string
     {
+
+        // This can happen if a default value is set for empty values in getNormalizedProperties()
+        if (is_string($value)) {
+            return $value;
+        }
+
         if (!$value) {
             return '';
         }
@@ -200,6 +268,11 @@ class PropertiesModel extends Model
 
     public function normalizeDimension($value): string
     {
+        // This can happen if a default value is set for empty values in getNormalizedProperties()
+        if (is_string($value)) {
+            return $value;
+        }
+
         if (!$value || !$value['quantity']) {
             return '';
         }

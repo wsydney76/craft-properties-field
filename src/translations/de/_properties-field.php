@@ -7,5 +7,6 @@ return [
     'Required' => 'Erforderlich',
     'Type' => 'Typ',
     'Options' => 'Optionen',
-
+    'Yes' => 'Ja',
+    'No' => 'Nein',
 ];

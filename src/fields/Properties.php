@@ -74,6 +74,17 @@ class Properties extends Field implements RelationalFieldInterface
     {
         $handles = [];
         foreach ($this->propertiesFieldConfig as $i => $fieldConfig) {
+
+            if (empty($fieldConfig['name'])) {
+                $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Name cannot be blank.'));
+            } else {
+                if (empty($fieldConfig['handle'])) {
+                    // If handle is empty, use name as handle
+                    $fieldConfig['handle'] = StringHelper::slugify($fieldConfig['name']);
+                    $this->propertiesFieldConfig[$i]['handle'] = $fieldConfig['handle'];
+                }
+            }
+
             if (empty($fieldConfig['handle'])) {
                 $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Handle cannot be blank.'));
             } elseif (in_array($fieldConfig['handle'], $handles, true)) {
@@ -82,9 +93,6 @@ class Properties extends Field implements RelationalFieldInterface
                 $handles[] = $fieldConfig['handle'];
             }
 
-            if (empty($fieldConfig['name'])) {
-                $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Name cannot be blank.'));
-            }
 
             if (!empty($fieldConfig['fieldConfig'])) {
                 // Check if fieldConfig is a valid JSON string
@@ -152,6 +160,8 @@ class Properties extends Field implements RelationalFieldInterface
             return new PropertiesModel([
                 'properties' => $value,
                 'propertiesFieldConfig' => $this->expandPropertySet($this->propertiesFieldConfig),
+                'element' => $element,
+                'field' => $this,
             ]);
         }
 
@@ -293,5 +303,17 @@ class Properties extends Field implements RelationalFieldInterface
         }
 
         return $newConfig;
+    }
+
+    public function getPropertyConfigByHandle(string $handle): mixed
+    {
+
+        foreach ($this->propertiesFieldConfig as $propertyConfig) {
+            if ($propertyConfig['handle'] === $handle) {
+                return $propertyConfig;
+            }
+        }
+
+        return null;
     }
 }
