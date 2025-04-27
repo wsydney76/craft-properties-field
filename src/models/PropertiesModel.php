@@ -76,6 +76,7 @@ class PropertiesModel extends Model
     {
         $props = array_merge([
             'ignoreEmpty' => false,
+            'ignoreMissing' => false,
             'default' => null,
         ], $props);
 
@@ -83,6 +84,10 @@ class PropertiesModel extends Model
         $data = [];
 
         foreach ($this->propertiesFieldConfig as $propertyConfig) {
+
+            if ($props['ignoreMissing'] && !isset($this->properties[$propertyConfig['handle']])) {
+                continue;
+            }
 
             // Newly added properties not in database
             if (!isset($this->properties[$propertyConfig['handle']])) {
@@ -169,14 +174,13 @@ class PropertiesModel extends Model
     }
 
 
-    public function normalizeEntry($value): mixed
+    public function normalizeEntry($value): ?Entry
     {
-        // This can happen if a default value is set for empty values in getNormalizedProperties()
-        if (is_string($value)) {
-            return $value;
+        try {
+            return $value ? Entry::findOne($value) : null;
+        } catch (Exception $e) {
+            return null; // This can happen if a default value is set for empty values in getNormalizedProperties()
         }
-
-        return $value ? Entry::findOne($value) : null;
     }
 
     public function normalizeEntries($value): mixed
@@ -189,14 +193,13 @@ class PropertiesModel extends Model
         return $value ? Entry::find()->id($value)->all() : [];
     }
 
-    public function normalizeAsset($value): mixed
+    public function normalizeAsset($value): ?Asset
     {
-        // This can happen if a default value is set for empty values in getNormalizedProperties()
-        if (is_string($value)) {
-            return $value;
+        try {
+            return $value ? Asset::findOne($value) : null;
+        } catch (Exception $e) {
+            return null; // This can happen if a default value is set for empty values in getNormalizedProperties()
         }
-
-        return $value ? Asset::findOne($value) : null;
     }
 
     public function normalizeAssets($value): mixed
@@ -209,9 +212,16 @@ class PropertiesModel extends Model
         return $value ? Asset::find()->id($value)->all() : [];
     }
 
-    public function normalizeDate($value): string
+    public function normalizeDate($value): ?string
     {
-        return $value ? Craft::$app->getFormatter()->asDate($value, PropertiesFieldPlugin::getInstance()->getSettings()->dateFormat) : '';
+        // Check if $value is a ISO 8601 date string
+        if (is_string($value)) {
+            $date = DateTimeHelper::toDateTime($value);
+            if ($date) {
+                return Craft::$app->getFormatter()->asDate($date, PropertiesFieldPlugin::getInstance()->getSettings()->dateFormat);
+            }
+        }
+        return $value;
     }
 
     public function normalizeSelect($value, $config)

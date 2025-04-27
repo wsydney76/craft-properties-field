@@ -9,7 +9,10 @@ use craft\base\RelationalFieldInterface;
 use craft\elements\Entry;
 use craft\errors\InvalidFieldException;
 use craft\helpers\Cp;
+use craft\helpers\DateTimeHelper;
 use craft\helpers\StringHelper;
+use Exception;
+use wsydney76\propertiesfield\events\DefineSearchKeywordsEvent;
 use wsydney76\propertiesfield\models\PropertiesModel;
 use wsydney76\propertiesfield\PropertiesFieldPlugin;
 use yii\db\Schema;
@@ -22,6 +25,8 @@ use function is_string;
  */
 class Properties extends Field implements RelationalFieldInterface
 {
+    public const EVENT_DEFINE_SEARCH_KEYWORDS = 'defineSearchKeywords';
+
     public array $propertiesFieldConfig = [];
 
     public static function displayName(): string
@@ -129,6 +134,7 @@ class Properties extends Field implements RelationalFieldInterface
                 'handle' => ['heading' => Craft::t('_properties-field', 'Handle'), 'type' => 'singleline', 'class' => 'code'],
                 'instructions' => ['heading' => Craft::t('_properties-field', 'Instructions'), 'type' => 'singleline'],
                 'required' => ['heading' => Craft::t('_properties-field', 'Required'), 'type' => 'lightswitch'],
+                'searchable' => ['heading' => Craft::t('_properties-field', 'Search'), 'type' => 'lightswitch'],
                 'type' => [
                     'heading' => Craft::t('_properties-field', 'Type'),
                     'type' => 'select',
@@ -206,7 +212,8 @@ class Properties extends Field implements RelationalFieldInterface
     }
 
     /**
-     * Check for required properties
+     * Validate properties
+     * TODO: Check if Craft's built-in validations can be used
      *
      * @param ElementInterface $element
      * @return void
@@ -216,19 +223,107 @@ class Properties extends Field implements RelationalFieldInterface
     {
         $data = $element->getFieldValue($this->handle);
         foreach ($this->propertiesFieldConfig as $property) {
-            $value = $data->properties[$property['handle']] ?? null;
-            if ($property['required'] && !$value) {
-                $element->addError($this->handle, $property['name'] . ': ' . Craft::t('_properties-field', 'cannot be blank.'));
+            // Using try/catch to avoid errors when the property is not set or mal formatted
+            try {
+                $value = $data->properties[$property['handle']] ?? null;
+                if ($property['required'] && !$value) {
+                    $element->addError($this->handle, $this->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'cannot be blank.'));
+                }
+
+                if ($property['required'] && $property['type'] == 'extendedBoolean' && !$value['comment']) {
+                    $element->addError($this->handle, $this->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'Comment cannot be blank.'));
+                }
+
+                if ($property['required'] && $property['type'] == 'dimension' && !$value['quantity']) {
+                    $element->addError($this->handle, $this->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'Quantity cannot be blank.'));
+                }
+
+                if ($property['type'] === 'email' && $value) {
+                    // Check if the value is a valid email address
+                    if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                        $element->addError($this->handle, $this->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'must be a valid email address.'));
+                    }
+                }
+
+                if ($property['type'] === 'number' && $value && $property['fieldConfig']) {
+                    $fieldConfig = json_decode($property['fieldConfig'], true);
+
+                    if (isset($fieldConfig['min'])) {
+                        if ($value < $fieldConfig['min']) {
+                            $element->addError($this->handle, $this->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'must be greater than or equal to {min}.', ['min' => $fieldConfig['min']]));
+                        }
+                    }
+                    if (isset($fieldConfig['max'])) {
+                        if ($value > $fieldConfig['max']) {
+                            $element->addError($this->handle, $this->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'must be less than or equal to {max}.', ['max' => $fieldConfig['max']]));
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                Craft::error($e->getMessage(), __METHOD__);
             }
         }
     }
 
     /**
      * @inheritDoc
+     * @throws InvalidFieldException
      */
     protected function searchKeywords(mixed $value, ElementInterface $element): string
     {
-        return StringHelper::toString($value, ' ');
+
+        $data = $element->getFieldValue($this->handle);
+        $keywords = [];
+
+        foreach ($data->getNormalizedProperties() as $property) {
+            switch ($property['type']) {
+                case 'text':
+                case 'textarea':
+                case 'email':
+                case 'number':
+                    $keywords[] = $property['value'];
+                    break;
+                case 'select':
+                    $keywords[] = $property['normalizedValue']->label ?? '';
+                    break;
+                case 'entry':
+                case 'asset':
+                    if ($property['normalizedValue']) {
+                        $keywords[] = $property['normalizedValue']->title ?? '';
+                    }
+                    break;
+                case 'entries':
+                case 'assets':
+                    if ($property['normalizedValue']) {
+                        foreach ($property['normalizedValue'] as $entry) {
+                            $keywords[] = $entry->title ?? '';
+                        }
+                    }
+                    break;
+                case 'extendedBoolean':
+                    $keywords[] = $property['value']['comment'] ?? '';
+                    break;
+                case 'boolean':
+                case 'date':
+                case 'groupHeader':
+                case 'set':
+                    // Do nothing
+                    break;
+                default:
+                    if ($this->hasEventHandlers(self::EVENT_DEFINE_SEARCH_KEYWORDS)) {
+                        $event = new DefineSearchKeywordsEvent([
+                            'element' => $element,
+                            'field' => $this,
+                            'property' => $property,
+                        ]);
+                        $this->trigger(self::EVENT_DEFINE_SEARCH_KEYWORDS, $event);
+                        $keywords[] = $event->keywords;
+                    }
+                    break;
+            }
+        }
+
+        return implode(' ', $keywords);
     }
 
 
@@ -291,6 +386,7 @@ class Properties extends Field implements RelationalFieldInterface
                             'handle' => $extraConfig['handle'] ?? '',
                             'instructions' => $extraConfig['instructions'] ?? '',
                             'required' => $extraConfig['required'] ?? false,
+                            'searchable' => $extraConfig['required'] ?? false,
                             'type' => $extraConfig['type'] ?? '',
                             'options' => $extraConfig['options'] ?? '',
                             'fieldConfig' => $extraConfig['fieldConfig'] ?? '',

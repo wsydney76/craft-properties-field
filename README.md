@@ -61,6 +61,8 @@ Work in progress. Not tested in a multi-site environment.
 
 ![Field settings](field-settings.jpg)
 
+TODO: Update screenshot, a 'search' lightswitch is now available.
+
 ### Use in a matrix block
 
 ![Columns settings](column.jpg)
@@ -124,6 +126,9 @@ A list of properties to be displayed in the field. Each property has the followi
 * Handle: The handle of the property (will be built from the name if not set)
 * Instructions: Instructions for the property, displayed in a popup via an `info` icon
 * Required: Whether the property is required
+  * For type `Boolean with comment`, a comment must be provided.
+  * For type `Dimension`, a quantity must be provided.
+* Search: Whether the property value should be searchable.
 * Type: The type of the property. The following types are supported:
     * Group header: A group header text
     * Text: A single line text field
@@ -186,7 +191,7 @@ Experimental approach:
 * No out-of-the-box validation for sub-fields.
 * No fancy UI for extended sub-field settings.
 * Does not support conditional logic.
-* No intelligent support for search (yet). For now, the stringified JSON field is thrown into the search index.
+* Eager loading of elements is not supported.
 
 ## Extending
 
@@ -294,6 +299,28 @@ Anything that is posted from fields is stored 'as is' in the database json field
 </div>
 ```
 
+Keywords can be added to the search index via an event:
+
+```php
+Event::on(
+    Properties::class,
+    Properties::EVENT_DEFINE_SEARCH_KEYWORDS,
+    function(DefineSearchKeywordsEvent $event) {
+        switch ($event->property['type']) {
+            case 'demo':
+                $event->keywords .= ' ' . $event->property['normalizedValue']['comment'];
+                break;
+            case 'languages':
+                foreach ($event->property['normalizedValue'] as $language) {
+                    $event->keywords .= ' ' . $language['language'];
+                }
+                break;
+        }
+    }
+
+);
+```
+
 ## Templating
 
 The field value is an instance of `wsydney76\propertiesfield\models\PropertiesModel` (or null if not set).
@@ -332,9 +359,17 @@ Loop over all properties:
 {% endfor %}    
 ```
 
-Ignore empty properties: 
+__Ignore missing/empty properties:__
 
 This is especially helpful if new properties are added to the field config, and explicit values are not yet saved.
+
+```twig
+{% for prop in props.getNormalizedProperties({ignoreMissing: true}) %}
+   ...
+{% endfor %}    
+```
+
+Ignores properties that are not in the database. Uses `isset()` internally.
 
 ```twig
 {% for prop in props.getNormalizedProperties({ignoreEmpty: true}) %}
@@ -342,12 +377,14 @@ This is especially helpful if new properties are added to the field config, and 
 {% endfor %}    
 ```
 
-TODO: Check, what 'empty' means for the different property types. This may not work currently as expected for all property types.
+Ignores properties that have an empty value. Uses `empty()` internally.
+
+TODO: Check, what 'empty' means for the different property types. This may work currently as expected for property types that return a scalar value.
 
 Alternatively, you can check the raw value of the property, `prop.value` will be `null` if the property is not in the database.
 
 
-Or set a default value for empty properties:
+__Set a default value for empty properties:__
 
 ```twig
 {% for prop in props.getNormalizedProperties({ignoreEmpty: true, default: 'n/a'}) %}
@@ -355,7 +392,7 @@ Or set a default value for empty properties:
 {% endfor %}    
 ```
 
-TODO: Check, this may throw errors if a property type does not return a string as normalized value.
+If the property is not set in the database, `prop.value` will be the default value. `prop.normalizedValue` will depend on the type of the property (e.g. null for element selects).
 
 Each property is an array with the following keys:
 
@@ -432,8 +469,6 @@ This does not differentiate between the different sub-fields, so all entries sel
 
 ### Todo:
 
-* Support 'required' setting for combined fields
-* Support 'normalizedValue' for combined fields
 * Better support for building the search index
 * Complete translations
 

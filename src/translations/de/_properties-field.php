@@ -5,6 +5,7 @@ return [
     'Placeholder' => 'Platzhalter',
     'Instructions' => 'Anweisungen',
     'Required' => 'Erforderlich',
+    'Search' => 'Suche',
     'Type' => 'Typ',
     'Options' => 'Optionen',
     'Yes' => 'Ja',
