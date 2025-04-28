@@ -291,6 +291,7 @@ class Properties extends Field implements RelationalFieldInterface
                     break;
                 case 'extendedBoolean':
                     $keywords[] = $property['value']['comment'] ?? '';
+                    $keywords[] = $property['name'];
                     break;
                 case 'boolean':
                     $keywords[] = $property['name'];
