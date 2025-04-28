@@ -85,7 +85,7 @@ class Properties extends Field implements RelationalFieldInterface
             } else {
                 if (empty($fieldConfig['handle'])) {
                     // If handle is empty, use name as handle
-                    $fieldConfig['handle'] = StringHelper::toCamelCase($fieldConfig['name']);
+                    $fieldConfig['handle'] = StringHelper::toHandle($fieldConfig['name']);
                     $this->propertiesFieldConfig[$i]['handle'] = $fieldConfig['handle'];
                 }
             }
