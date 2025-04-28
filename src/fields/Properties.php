@@ -293,6 +293,8 @@ class Properties extends Field implements RelationalFieldInterface
                     $keywords[] = $property['value']['comment'] ?? '';
                     break;
                 case 'boolean':
+                    $keywords[] = $property['name'];
+                    break;
                 case 'date':
                 case 'groupHeader':
                 case 'set':
