@@ -510,7 +510,14 @@ class MyPropertiesModel
 
 Intentionally, the sub keys are the handles of the properties, not a UID. Which means, changing the handle of a property in the field requires a content migration.
 
-ChatGPT suggests the following SQL to update the content in the database:
+There is an experimental CLI included, that can be used to update the content in the database.
+
+```bash
+craft _properties-field/change-handle entryTypeHandle fieldTypeHandle oldPropertyHandle newPropertyHandle
+```
+
+It runs SQL like this to update the content in the database:
+
 
 ```mysql
 UPDATE elements_sites
@@ -524,5 +531,3 @@ SET content = JSON_REMOVE(
 )
 WHERE JSON_CONTAINS_PATH(content, 'one', '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8"."oldHandle"');
 ```
-
-Untested.
