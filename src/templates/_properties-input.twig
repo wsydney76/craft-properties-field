@@ -7,6 +7,8 @@
 
 {% import '_includes/forms.twig' as forms %}
 
+{% set color = field.color ?: 'gray' %}
+
 
 {% namespace field.handle %}
     <table class="editable fullwidth">
@@ -30,7 +32,7 @@
                 </tr>
             {% else %}
                 <tr>
-                    <th class="heading-cell thin" style="background-color: var(--gray-050); text-align: left; padding: 7px;">
+                    <th class="heading-cell thin" style="background-color: var(--{{ color }}-050); text-align: left; padding: 7px;">
                         {{ propertyConfig.name|t }}
                         {% if propertyConfig.instructions ?? null %}
                             <span class="info">
@@ -73,7 +75,7 @@
 .group-header {
     font-weight: 700 !important;
 
-    background-color: var(--gray-100) !important;
+    background-color: var(--{{ color }}-100) !important;
     text-transform: uppercase;
     letter-spacing: 1px;
     padding: 8px 0;

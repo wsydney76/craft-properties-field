@@ -120,7 +120,9 @@ This means that all values are stored as strings, including numbers and element 
 
 ### Field settings
 
-A list of properties to be displayed in the field. Each property has the following settings:
+Color: The background color of group headers and property labels. Defaults to `no color` (aka gray)
+
+Property types configuration: A list of properties to be displayed in the field. Each property has the following settings:
 
 * Name: The name of the property
 * Handle: The handle of the property (will be built from the name if not set)
@@ -188,138 +190,12 @@ Experimental approach:
 * Does not support all possible field settings
 * Craft is not aware of sub-fields, so the whole field is marked as updated on changes, and a translation method can
   only be used for the whole field, not for sub-fields.
-* No out-of-the-box validation for sub-fields.
+* No out-of-the-box validation for sub-fields, validation errors cannot be attached to a sub-field.
 * No fancy UI for extended sub-field settings.
 * Does not support conditional logic.
 * Eager loading of elements is not supported.
 
-## Extending
 
-The plugin can be extended by creating custom property types.
-
-Examples:
-
-![Custom property types](extension.jpg)
-
-```php
-<?php
-
-// config/_properties-field.php
-
-return [
-    'customInputTemplateDir' => '_properties-field-inputs',
-    'extraPropertiesConfig' => [
-        'demo' => [
-            'label' => 'Demo',
-            'type' => 'demo',
-            'template' => '_properties-field-inputs/demo.twig',
-        ],
-        'languages' => [
-            'label' => 'Languages',
-            'type' => 'languages',
-            'template' => '_properties-field-inputs/languages.twig',
-        ]
-    ],
-];
-
-```
-
-Define twig templates inside the folder specified by `customInputTemplateDir` in the plugin settings.
-
-The templates receive the following variables:
-
-* `propertyConfig`: The property config, containing the name, handle, type, and options
-* `value`: The value of the property, raw value as stored in the database
-* `settings`: The plugin settings
-
-Use multiple inputs with sub-keys for each input:
-
-```twig
-{% import '_includes/forms.twig' as forms %}
-
-<div style="padding: 16px 8px 8px 8px; display: flex; align-items: center">
-    <div>
-        {{ forms.elementSelect({
-            name: "#{propertyConfig.handle}[image]",
-            elements: value['image'] ? craft.assets.id(value['image']).all : [],
-            elementType: 'craft\\elements\\Asset',
-            single: true,
-            viewMode: 'list'
-        }) }}
-    </div>
-
-    <div style="margin-left: 8px; width: 100%;">
-        {{ forms.text({
-            name: "#{propertyConfig.handle}[comment]",
-            value: value['comment'] ?? '',
-            placeholder: 'Comment'|t,
-            class: 'text-combined',
-            first: true
-        }) }}
-    </div>
-
-    <div style="margin-left: 8px;">
-        {{ forms.select({
-            name: "#{propertyConfig.handle}[select]",
-            value: value['select'] ?? '',
-            options: [
-                {label: 'Option One', value: 'one'},
-                {label: 'Option Two', value: 'two'},
-                {label: 'Option Three', value: 'three'},
-            ],
-            first: true
-        }) }}
-    </div>
-</div>
-```
-
-Anything that is posted from fields is stored 'as is' in the database json field.
-
-```twig
-{% import '_includes/forms.twig' as forms %}
-
-<div style="padding: 16px 8px 8px 8px; ">
-    {{ forms.editableTable({
-        id: propertyConfig.handle,
-        name: propertyConfig.handle,
-        addRowLabel: 'Add a language'|t,
-        allowAdd: true,
-        allowReorder: true,
-        allowDelete: true,
-        cols: {
-            language: {heading: 'Language'|t, type: 'singleline'},
-            level: {heading: 'Level'|t, type: 'select', width: '150px', options: [
-                {label: 'Native speaker'|t, value: 'native'},
-                {label: 'Expert'|t, value: 'expert'},
-                {label: 'Beginner'|t, value: 'beginner'},
-            ]}
-        },
-        rows: value
-    }) }}
-</div>
-```
-
-Keywords can be added to the search index via an event:
-
-```php
-Event::on(
-    Properties::class,
-    Properties::EVENT_DEFINE_SEARCH_KEYWORDS,
-    function(DefineSearchKeywordsEvent $event) {
-        switch ($event->property['type']) {
-            case 'demo':
-                $event->keywords .= ' ' . $event->property['normalizedValue']['comment'];
-                break;
-            case 'languages':
-                foreach ($event->property['normalizedValue'] as $language) {
-                    $event->keywords .= ' ' . $language['language'];
-                }
-                break;
-        }
-    }
-
-);
-```
 
 ## Templating
 
@@ -424,7 +300,10 @@ entry.fieldHandle.get('subfieldHandle') // raw value
 entry.fieldHandle.getNormalized('subfieldHandle') // normalized value
 ```
 
-Entries can be queried via the `hasProp()` entry query method:
+Entries can be queried via the following entry query methods:
+
+* `hasProp()` (for scalar values) 
+* `propContains()` (for array elements, e.g. entries/assets property types)
 
 ```twig
 .hasProp('entryTypeHandle', 'fieldHandle', 'subfieldHandle', 'value')
@@ -438,9 +317,12 @@ Entries can be queried via the `hasProp()` entry query method:
 .all
 %}
 
-```
+{% set entries = craft.entries
+    .propContains('propertiesKitchensink', 'kitchensink', 'multiEntry', '5098')
+.all
+%}
 
-TODO: Allow querying for items in arrays (for entries/assets).
+```
 
 The `Entry/Entries/Asset/Assets` sub-field types establish a relation, that can be queried via the `relatedTo` query
 param
@@ -451,24 +333,196 @@ param
 .all %}
 ```
 
-TODO: Check why `.relatedTo({targetElement: 5231, field: 'personalData'})` does not work.
+TODO: Check why `.relatedTo({targetElement: 5231, field: 'personalData'})` does not work. Use `propContains()` instead.
 
 This does not differentiate between the different sub-fields, so all entries selected by any sub-field are returned.
 
-## Roadmap for beta.2
+## Extending
 
-### Merged:
+The plugin can be extended by creating custom property types.
 
-* 'Boolean with comment' property type
-* 'Dimension' property type
-* Allow customization of property types
-* Load input field templates for property types dynamically
-* Group Header property type
-* Field config settings
-* Experimental, wip: Support for dynamic property config
+Examples:
 
-### Todo:
+![Custom property types](extension.jpg)
 
-* Better support for building the search index
-* Complete translations
+### Configuring custom property types
 
+```php
+<?php
+
+// config/_properties-field.php
+
+use modules\main\properties\MyPropertiesModel;
+
+return [
+    'customInputTemplateDir' => '_properties-field-inputs',
+    'extraPropertiesConfig' => [
+        'demo' => [
+            'label' => 'Demo',
+            'type' => 'demo',
+            'template' => '_properties-field-inputs/demo.twig',
+            'normalize' => [MyPropertiesModel::class, 'normalizeDemo'], // Optional, see callbacks section below
+            'validate' => [[MyPropertiesModel::class, 'validateDemo']], // Optional, see callbacks section below
+        ],
+        'languages' => [
+            'label' => 'Languages',
+            'type' => 'languages',
+            'template' => '_properties-field-inputs/languages.twig',
+            'validate' => [[MyPropertiesModel::class, 'validateLanguages']],
+        ]
+    ],
+];
+
+```
+
+### Templating custom property types
+
+Define twig templates inside the folder specified by `customInputTemplateDir` in the plugin settings.
+
+The templates receive the following variables:
+
+* `propertyConfig`: The property config, containing the name, handle, type, and options
+* `value`: The value of the property, raw value as stored in the database
+* `settings`: The plugin settings
+
+Use multiple inputs with sub-keys for each input:
+
+```twig
+{% import '_includes/forms.twig' as forms %}
+
+<div style="padding: 16px 8px 8px 8px; display: flex; align-items: center">
+    <div>
+        {{ forms.elementSelect({
+            name: "#{propertyConfig.handle}[image]",
+            elements: value['image'] ? craft.assets.id(value['image']).all : [],
+            elementType: 'craft\\elements\\Asset',
+            single: true,
+            viewMode: 'list'
+        }) }}
+    </div>
+
+    <div style="margin-left: 8px; width: 100%;">
+        {{ forms.text({
+            name: "#{propertyConfig.handle}[comment]",
+            value: value['comment'] ?? '',
+            placeholder: 'Comment'|t,
+            class: 'text-combined',
+            first: true
+        }) }}
+    </div>
+
+    <div style="margin-left: 8px;">
+        {{ forms.select({
+            name: "#{propertyConfig.handle}[select]",
+            value: value['select'] ?? '',
+            options: [
+                {label: 'Option One', value: 'one'},
+                {label: 'Option Two', value: 'two'},
+                {label: 'Option Three', value: 'three'},
+            ],
+            first: true
+        }) }}
+    </div>
+</div>
+```
+
+Anything that is posted from fields is stored 'as is' in the database json field.
+
+```twig
+{% import '_includes/forms.twig' as forms %}
+
+<div style="padding: 16px 8px 8px 8px; ">
+    {{ forms.editableTable({
+        id: propertyConfig.handle,
+        name: propertyConfig.handle,
+        addRowLabel: 'Add a language'|t,
+        allowAdd: true,
+        allowReorder: true,
+        allowDelete: true,
+        cols: {
+            language: {heading: 'Language'|t, type: 'singleline'},
+            level: {heading: 'Level'|t, type: 'select', width: '150px', options: [
+                {label: 'Native speaker'|t, value: 'native'},
+                {label: 'Expert'|t, value: 'expert'},
+                {label: 'Beginner'|t, value: 'beginner'},
+            ]}
+        },
+        rows: value
+    }) }}
+</div>
+```
+
+### Search custom property types
+
+Keywords can be added to the search index via an event:
+
+```php
+Event::on(
+    Properties::class,
+    Properties::EVENT_DEFINE_SEARCH_KEYWORDS,
+    function(DefineSearchKeywordsEvent $event) {
+        switch ($event->property['type']) {
+            case 'demo':
+                $event->keywords .= ' ' . $event->property['normalizedValue']['comment'];
+                break;
+            case 'languages':
+                foreach ($event->property['normalizedValue'] as $language) {
+                    $event->keywords .= ' ' . $language['language'];
+                }
+                break;
+        }
+    }
+
+);
+```
+
+### Callbacks for custom property types
+
+The config can define callbacks for the `normalize` and `validate` methods.
+
+```php
+<?php
+
+namespace modules\main\properties;
+
+use Craft;
+use craft\base\ElementInterface;
+use wsydney76\propertiesfield\fields\Properties;
+
+class MyPropertiesModel
+{
+    public static function normalizeDemo(mixed $value): mixed
+    {
+        return 'A dummy demo text';
+    }
+
+    public static function validateDemo(ElementInterface $element, Properties $field, array $property, mixed $value): void
+    {
+        if (... validation fails ...) {
+            $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('site', 'Demo went wrong.'));
+        }
+    }
+}
+```
+
+
+## Migrations:
+
+Intentionally, the sub keys are the handles of the properties, not a UID. Which means, changing the handle of a property in the field requires a content migration.
+
+ChatGPT suggests the following SQL to update the content in the database:
+
+```mysql
+UPDATE elements_sites
+SET content = JSON_REMOVE(
+    JSON_SET(
+        content,
+        '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8"."newHandle"',
+        JSON_EXTRACT(content, '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8"."oldHandle"')
+    ),
+    '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8"."oldHandle"'
+)
+WHERE JSON_CONTAINS_PATH(content, 'one', '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8"."oldHandle"');
+```
+
+Untested.

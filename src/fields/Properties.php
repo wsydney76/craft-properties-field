@@ -9,7 +9,6 @@ use craft\base\RelationalFieldInterface;
 use craft\elements\Entry;
 use craft\errors\InvalidFieldException;
 use craft\helpers\Cp;
-use craft\helpers\DateTimeHelper;
 use craft\helpers\StringHelper;
 use Exception;
 use wsydney76\propertiesfield\events\DefineSearchKeywordsEvent;
@@ -28,6 +27,7 @@ class Properties extends Field implements RelationalFieldInterface
     public const EVENT_DEFINE_SEARCH_KEYWORDS = 'defineSearchKeywords';
 
     public array $propertiesFieldConfig = [];
+    public string $color = '';
 
     public static function displayName(): string
     {
@@ -85,13 +85,15 @@ class Properties extends Field implements RelationalFieldInterface
             } else {
                 if (empty($fieldConfig['handle'])) {
                     // If handle is empty, use name as handle
-                    $fieldConfig['handle'] = StringHelper::slugify($fieldConfig['name']);
+                    $fieldConfig['handle'] = StringHelper::toCamelCase($fieldConfig['name']);
                     $this->propertiesFieldConfig[$i]['handle'] = $fieldConfig['handle'];
                 }
             }
 
             if (empty($fieldConfig['handle'])) {
                 $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Handle cannot be blank.'));
+            } elseif (!(bool)preg_match('/^[a-zA-Z][a-zA-Z0-9_]*$/', $fieldConfig['handle'])) {
+                $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Is not a valid handle.'));
             } elseif (in_array($fieldConfig['handle'], $handles, true)) {
                 $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Handle must be unique.'));
             } else {
@@ -119,37 +121,45 @@ class Properties extends Field implements RelationalFieldInterface
         $settings = PropertiesFieldPlugin::getInstance()->getSettings();
 
         $options = array_merge($settings->propertiesConfig, $settings->extraPropertiesConfig);
-        return Cp::editableTableFieldHtml([
-            'label' => Craft::t('_properties-field', 'Properties Configuration'),
-            'instructions' => Craft::t('_properties-field', 'Options for select: one option per line, in the format value:label<br>Options for entries/assets: section/volume handles, comma separated'),
-            'id' => 'propertiesFieldConfig',
-            'name' => 'propertiesFieldConfig',
-            'addRowLabel' => Craft::t('_properties-field', 'Add a property'),
-            'allowAdd' => true,
-            'allowReorder' => true,
-            'allowDelete' => true,
-            'warning' => Craft::t('_properties-field', 'Renaming an existing option or changing its type may result in data loss or runtime errors without migrating existing content.'),
-            'cols' => [
-                'name' => ['heading' => Craft::t('_properties-field', 'Name'), 'type' => 'singleline'],
-                'handle' => ['heading' => Craft::t('_properties-field', 'Handle'), 'type' => 'singleline', 'class' => 'code'],
-                'instructions' => ['heading' => Craft::t('_properties-field', 'Instructions'), 'type' => 'singleline'],
-                'required' => ['heading' => Craft::t('_properties-field', 'Required'), 'type' => 'lightswitch'],
-                'searchable' => ['heading' => Craft::t('_properties-field', 'Search'), 'type' => 'lightswitch'],
-                'type' => [
-                    'heading' => Craft::t('_properties-field', 'Type'),
-                    'type' => 'select',
-                    'class' => 'code',
-                    'options' => $options,
-                    'width' => '10%',
-                ],
-                'options' => ['heading' => Craft::t('_properties-field', 'Options'), 'type' => 'multiline'],
-                'fieldConfig' => ['heading' => Craft::t('_properties-field', 'Field Config'), 'type' => 'multiline'],
+        return
+            Cp::colorSelectFieldHtml([
+                'label' => Craft::t('_properties-field', 'Base Color'),
+                'name' => 'color',
+                'value' => $this->color,
+                'id' => 'color',
+                'instructions' => Craft::t('_properties-field', 'The background color for group headers and property labels.'),
+            ]) .
+            Cp::editableTableFieldHtml([
+                'label' => Craft::t('_properties-field', 'Properties Configuration'),
+                'instructions' => Craft::t('_properties-field', 'Options for select: one option per line, in the format value:label<br>Options for entries/assets: section/volume handles, comma separated'),
+                'id' => 'propertiesFieldConfig',
+                'name' => 'propertiesFieldConfig',
+                'addRowLabel' => Craft::t('_properties-field', 'Add a property'),
+                'allowAdd' => true,
+                'allowReorder' => true,
+                'allowDelete' => true,
+                'warning' => Craft::t('_properties-field', 'Renaming an existing option or changing its type may result in data loss or runtime errors without migrating existing content.'),
+                'cols' => [
+                    'name' => ['heading' => Craft::t('_properties-field', 'Name'), 'type' => 'singleline'],
+                    'handle' => ['heading' => Craft::t('_properties-field', 'Handle'), 'type' => 'singleline', 'class' => 'code'],
+                    'instructions' => ['heading' => Craft::t('_properties-field', 'Instructions'), 'type' => 'singleline'],
+                    'required' => ['heading' => Craft::t('_properties-field', 'Required'), 'type' => 'lightswitch'],
+                    'searchable' => ['heading' => Craft::t('_properties-field', 'Search'), 'type' => 'lightswitch'],
+                    'type' => [
+                        'heading' => Craft::t('_properties-field', 'Type'),
+                        'type' => 'select',
+                        'class' => 'code',
+                        'options' => $options,
+                        'width' => '10%',
+                    ],
+                    'options' => ['heading' => Craft::t('_properties-field', 'Options'), 'type' => 'multiline'],
+                    'fieldConfig' => ['heading' => Craft::t('_properties-field', 'Field Config'), 'type' => 'multiline'],
 
-            ],
-            'rows' => $this->propertiesFieldConfig,
-            'errors' => $this->getErrors('propertiesFieldConfig'),
-            'data' => ['error-key' => 'options'],
-        ]);
+                ],
+                'rows' => $this->propertiesFieldConfig,
+                'errors' => $this->getErrors('propertiesFieldConfig'),
+                'data' => ['error-key' => 'options'],
+            ]);
     }
 
     /**
@@ -222,44 +232,23 @@ class Properties extends Field implements RelationalFieldInterface
     public function validateProperties(ElementInterface $element)
     {
         $data = $element->getFieldValue($this->handle);
+        $settings = PropertiesFieldPlugin::getInstance()->getSettings();
+
+        // \Craft::dd($settings->getAllPropertiesConfig());
+
         foreach ($this->propertiesFieldConfig as $property) {
             // Using try/catch to avoid errors when the property is not set or mal formatted
+            $callbacks = $settings->getAllPropertiesConfig()[$property['type']]['validate'] ?? null;
             try {
-                $value = $data->properties[$property['handle']] ?? null;
-                if ($property['required'] && !$value) {
-                    $element->addError($this->handle, $this->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'cannot be blank.'));
-                }
-
-                if ($property['required'] && $property['type'] == 'extendedBoolean' && !$value['comment']) {
-                    $element->addError($this->handle, $this->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'Comment cannot be blank.'));
-                }
-
-                if ($property['required'] && $property['type'] == 'dimension' && !$value['quantity']) {
-                    $element->addError($this->handle, $this->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'Quantity cannot be blank.'));
-                }
-
-                if ($property['type'] === 'email' && $value) {
-                    // Check if the value is a valid email address
-                    if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                        $element->addError($this->handle, $this->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'must be a valid email address.'));
-                    }
-                }
-
-                if ($property['type'] === 'number' && $value && $property['fieldConfig']) {
-                    $fieldConfig = json_decode($property['fieldConfig'], true);
-
-                    if (isset($fieldConfig['min'])) {
-                        if ($value < $fieldConfig['min']) {
-                            $element->addError($this->handle, $this->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'must be greater than or equal to {min}.', ['min' => $fieldConfig['min']]));
-                        }
-                    }
-                    if (isset($fieldConfig['max'])) {
-                        if ($value > $fieldConfig['max']) {
-                            $element->addError($this->handle, $this->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'must be less than or equal to {max}.', ['max' => $fieldConfig['max']]));
-                        }
+                if ($callbacks) {
+                    foreach ($callbacks as $callback) {
+                        call_user_func($callback, $element, $this, $property, $data->properties[$property['handle']] ?? null);
                     }
                 }
             } catch (Exception $e) {
+                if (Craft::$app->config->general->devMode) {
+                    \Craft::dd($e->getMessage());
+                }
                 Craft::error($e->getMessage(), __METHOD__);
             }
         }
@@ -411,5 +400,58 @@ class Properties extends Field implements RelationalFieldInterface
         }
 
         return null;
+    }
+
+    public function validateRequired(ElementInterface $element, Properties $field, array $property, mixed $value): void
+    {
+        if ($property['required'] && !$value) {
+            $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'cannot be blank.'));
+        }
+    }
+
+    public function validateNumber(ElementInterface $element, Properties $field, array $property, mixed $value): void
+    {
+        if (!$value) {
+            return;
+        }
+
+        $fieldConfig = json_decode($property['fieldConfig'], true);
+
+        if (isset($fieldConfig['min'])) {
+            if ($value < $fieldConfig['min']) {
+                $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'must be greater than or equal to {min}.', ['min' => $fieldConfig['min']]));
+            }
+        }
+        if (isset($fieldConfig['max'])) {
+            if ($value > $fieldConfig['max']) {
+                $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'must be less than or equal to {max}.', ['max' => $fieldConfig['max']]));
+            }
+        }
+    }
+
+    public function validateEmail(ElementInterface $element, Properties $field, array $property, mixed $value): void
+    {
+        if (!$value) {
+            return;
+        }
+
+        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+            $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'must be a valid email address.'));
+        }
+    }
+
+    public function validateExtendedBoolean(ElementInterface $element, Properties $field, array $property, mixed $value): void
+    {
+        if ($property['required'] && !$value['comment']) {
+            $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'Comment cannot be blank.'));
+        }
+    }
+
+    public function validateDimension(ElementInterface $element, Properties $field, array $property, mixed $value): void
+    {
+        if ($property['required'] && !$value['quantity']) {
+            $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'Quantity cannot be blank.'));
+        }
+
     }
 }

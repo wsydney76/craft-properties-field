@@ -136,7 +136,7 @@ class PropertiesModel extends Model
      */
     private function getNormalizedValue($config, mixed $value): mixed
     {
-        $callback = $this->settings->propertiesConfig [$config['type']]['normalize'] ?? null;
+        $callback = $this->settings->getAllPropertiesConfig()[$config['type']]['normalize'] ?? null;
 
         if ($callback) {
             return call_user_func($callback, $value, $config);
