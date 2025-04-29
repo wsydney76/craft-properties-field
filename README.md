@@ -57,20 +57,18 @@ Work in progress. Not tested in a multi-site environment.
 
 ### Standard fields
 
-![Field input](field-input.jpg)
+![Field input](images/field-input.jpg)
 
-![Field settings](field-settings.jpg)
-
-TODO: Update screenshot, a 'search' lightswitch is now available.
+![Field settings](images/field-settings.jpg)
 
 ### Use in a matrix block
 
-![Columns settings](column.jpg)
+![Columns settings](images/column.jpg)
 
 ### Group headers and multi-sub-fields properties
 
-![Field input](field-input2.jpg)
-![Field settings](field-settings2.jpg)
+![Field input](images/field-input2.jpg)
+![Field settings](images/field-settings2.jpg)
 
 (This kind of setup is actually one of the main use cases for this plugin, as it allows to add/remove/rearrange properties consistently without creating a myriad of fields/matrix blocks.)
 
@@ -343,7 +341,7 @@ The plugin can be extended by creating custom property types.
 
 Examples:
 
-![Custom property types](extension.jpg)
+![Custom property types](images/extension.jpg)
 
 ### Configuring custom property types
 

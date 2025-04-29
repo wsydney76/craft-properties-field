@@ -72,6 +72,22 @@ settings:
               - type
               - lightswitch
       -
+        - col8
+        -
+          __assoc__:
+            -
+              - heading
+              - Search
+            -
+              - handle
+              - searchable
+            -
+              - width
+              - ''
+            -
+              - type
+              - lightswitch
+      -
         - col5
         -
           __assoc__:

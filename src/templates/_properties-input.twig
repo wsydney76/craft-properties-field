@@ -7,7 +7,10 @@
 
 {% import '_includes/forms.twig' as forms %}
 
-{% set color = field.color ?: 'gray' %}
+{% set color = field.color %}
+{% if not color or color == '__blank__' %}
+    {% set color = 'gray' %}
+{% endif %}
 
 
 {% namespace field.handle %}
