@@ -359,29 +359,38 @@ entry.fieldHandle.get('subfieldHandle') // raw value
 entry.fieldHandle.getNormalized('subfieldHandle') // normalized value
 ```
 
+### Querying
+
 Entries can be queried via the following entry query methods:
 
-* `hasProp()` (for scalar values) 
-* `propContains()` (for array elements, e.g. entries/assets property types)
+* `.fieldHandle({subFieldhandle: value})` (for scalar values, where subFieldHandle can be a path). 
+* `.fieldHandle({subFieldhandle: value, searchInArray: true})` (for array elements, e.g. entries/assets property types)
 
 ```twig
-.hasProp('entryTypeHandle', 'fieldHandle', 'subfieldHandle', 'value')
-
 {% set entries = craft.entries
-    .hasProp('person', 'personalData', 'age', '33')
+    .type('propertiesPersonalData')
+    .personalData({gender: 'm'})
 .all %}
 
+{# path #}
 {% set entries = craft.entries
-    .hasProp('propertyTest2', 'skills', 'vue.isOn', '1')
-.all
-%}
+    .type('propertiesSkills')
+    .skills({'vue.isOn': '1'})
+.all %}
 
+{# search for value in array #}
 {% set entries = craft.entries
-    .propContains('propertiesKitchensink', 'kitchensink', 'multiEntry', '5098')
-.all
+    .type('propertiesPersonalData')
+    .personalData({relatedPosts: '5231', searchInArray: true})
+.all %}
 %}
-
 ```
+
+TODO: Supports only a single field instance for now, so requires an entry type param if ambiguous.
+
+
+
+### Relations
 
 The `Entry/Entries/Asset/Assets` sub-field types establish a relation, that can be queried via the `relatedTo` query
 param

@@ -14,10 +14,13 @@ use Exception;
 use wsydney76\propertiesfield\events\DefineSearchKeywordsEvent;
 use wsydney76\propertiesfield\models\PropertiesModel;
 use wsydney76\propertiesfield\PropertiesFieldPlugin;
+use yii\db\ExpressionInterface;
 use yii\db\Schema;
+use function array_key_first;
 use function array_merge;
 use function is_array;
 use function is_string;
+use function sprintf;
 
 /**
  * Properties field type
@@ -509,5 +512,32 @@ class Properties extends Field implements RelationalFieldInterface
         if ($property['required'] && !$value['quantity']) {
             $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'Quantity cannot be blank.'));
         }
+    }
+
+    public static function queryCondition(array $instances, mixed $value, array &$params): array|string|ExpressionInterface|false|null
+    {
+        // Provisional implementation
+        // TODO: add support for multiple instances
+        // TODO: add support for like, and/or...
+        // TODO: Db::parseParam could possibly be used here, figure out how to use it
+        // Returning simple sql statement for now
+        if (count($instances) > 1) {
+            throw new \InvalidArgumentException('Multiple instances are not yet supported.');
+        }
+
+        $searchInArray = $value['searchInArray'] ?? false;
+        $propertyHandle = array_key_first($value);
+        $propertyValue = $value[$propertyHandle];
+
+
+        if ($searchInArray) {
+            return sprintf("JSON_CONTAINS(JSON_EXTRACT(content, '$.\"%s\".%s'), '\"%s\"')", $instances[0]->layoutElement->uid, $propertyHandle, $propertyValue);
+        }
+
+        // Scalar value
+        $valueSql = sprintf("(`elements_sites`.`content`->>'$.\"%s\".%s')",
+            $instances[0]->layoutElement->uid, $propertyHandle
+        );
+        return [$valueSql => $propertyValue];
     }
 }
