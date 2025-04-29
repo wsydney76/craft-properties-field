@@ -4,15 +4,21 @@ Adds a properties field type
 
 ## Requirements
 
-This plugin is tested with Craft CMS 5.7, and PHP 8.3.
+This plugin is tested with Craft CMS 5.7, MySql 8.0 and PHP 8.3.
+
+## Version note
+
+Feature freeze for now.
+
+Tagged 1.0.0-beta.2 as an MVP (minimum viable product) version, and started testing and polishing the plugin in parallel with the development of the project for which it is mainly intended.
+
+Won't make sense to push every minor tweak, so we will share a first final version in a couple of weeks (or months...).
 
 ## Installation
 
 Add to `composer.json` file in your project root to require this plugin:
 
-Use version `^1.0.0-beta.1` for 'official' releases, or `dev-main` for the latest development version, where anything can go wrong.
-
-
+Use version `^1.0.0-beta.2` for 'official' releases, or `dev-main` for the latest development version, where anything can go wrong.
 
 ```json
 {
@@ -156,9 +162,20 @@ Property types configuration: A list of properties to be displayed in the field.
     * `{"min": 0,"max": 100,"step": 5}` for a number field
   
   Supported for text/email/number, textarea, boolean, select, date, entries/assets property types.
-  
-  TODO: Take these settings into account when validating the field.
 
+### Defaults
+
+Intentionally, there is no setting for a default value. This is because we want the field to be used in a way that the properties are always explicitly set by the editor, rather than relying on a random default value.
+
+In case you can't resist, there is an experimental CLI command included that lets you set a value for a property, where it is not already set.
+
+```bash
+craft _properties-field/set-default entryTypeHandle fieldHandle propertyHandle value
+```
+
+Handles only scalar values for now.
+
+```bash
 
 ## Dynamic property config
 
@@ -508,7 +525,7 @@ class MyPropertiesModel
 
 Intentionally, the sub keys are the handles of the properties, not a UID. Which means, changing the handle of a property in the field requires a content migration.
 
-There is an experimental CLI included, that can be used to update the content in the database.
+There is an experimental CLI command included, that can be used to update the content in the database.
 
 ```bash
 craft _properties-field/change-handle entryTypeHandle fieldTypeHandle oldPropertyHandle newPropertyHandle
