@@ -63,7 +63,7 @@ Work in progress. Not tested in a multi-site environment.
 
 ### Use in a matrix block
 
-![Columns settings](images/column.jpg)
+![Columns settings](images/col)
 
 ### Group headers and multi-sub-fields properties
 
