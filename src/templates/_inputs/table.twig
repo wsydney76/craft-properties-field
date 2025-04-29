@@ -1,0 +1,19 @@
+{% import '_includes/forms.twig' as forms %}
+
+{% set extraConfig = propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {} %}
+
+
+<div style="padding: 16px 8px 8px 8px; ">
+    {{ forms.editableTable({
+        id: propertyConfig.handle ~ random(),
+        name: propertyConfig.handle,
+        addRowLabel: 'Add a row'|t,
+        allowAdd: true,
+        allowReorder: true,
+        allowDelete: true,
+        cols: {
+            text: {heading: 'Text'|t, type: 'singleline'},
+        },
+        rows: value
+    }|merge(extraConfig)) }}
+</div>

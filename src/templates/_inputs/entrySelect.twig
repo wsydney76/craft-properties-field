@@ -1,0 +1,25 @@
+{% import '_includes/forms.twig' as forms %}
+
+{% set query = craft.entries.orderBy('title') %}
+
+{% if not propertyConfig.options %}
+    {% exit 403 "Condition missing for entrySelect #{propertyConfig['name']}" %}
+{% endif %}
+
+
+{% set options = craft.entries(propertyConfig.options|json_decode).withCustomfields(false).all|map(entry => {
+    value: entry.id,
+    label: entry.title
+}) %}
+
+{% if not propertyConfig.required %}
+    {% set options = options|unshift({value: '', label: '-'}) %}
+{% endif %}
+
+<div style="padding: 8px;">
+    {{ forms.selectize({
+        name: propertyConfig.handle,
+        value: value ?? '',
+        options: options,
+    }|merge(propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {})) }}
+</div>

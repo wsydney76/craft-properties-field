@@ -107,6 +107,7 @@ class PropertiesModel extends Model
                 'value' => $value,
                 'type' => $propertyConfig['type'],
                 'normalizedValue' => $this->getNormalizedValue($propertyConfig, $value),
+                // 'fieldConfig' => $propertyConfig['fieldConfig'],
             ];
         }
 

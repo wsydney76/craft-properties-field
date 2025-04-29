@@ -203,7 +203,7 @@ class Properties extends Field implements RelationalFieldInterface
         return Craft::$app->getView()->renderTemplate('_properties-field/_properties-input', [
             'field' => $this,
             'properties' => $value->properties,
-            'propertiesFieldConfig' => $this->expandPropertySet($value->propertiesFieldConfig),
+            'propertiesFieldConfig' => $this->expandPropertySet($value->propertiesFieldConfig, true),
             'element' => $element,
             'settings' => PropertiesFieldPlugin::getInstance()->getSettings(),
         ]);
@@ -346,7 +346,8 @@ class Properties extends Field implements RelationalFieldInterface
      */
     public function getRelationTargetIds(ElementInterface $element): array
     {
-        $properties = $element->getFieldValue($this->handle)->getNormalizedProperties();
+        $propertyModel = $element->getFieldValue($this->handle);
+        $properties = $propertyModel->getNormalizedProperties();
         $ids = [];
         foreach ($properties as $property) {
             // The types that provide either a single id or an array of IDs
@@ -359,10 +360,32 @@ class Properties extends Field implements RelationalFieldInterface
             }
         }
 
+        // Add the IDs from the table fields columns with type = entrySelect
+        // Experimental...
+        foreach ($this->propertiesFieldConfig as $propertyConfig) {
+            if ($propertyConfig['type'] === 'table') {
+                $fieldConfig = json_decode($propertyConfig['fieldConfig'], true);
+                if (isset($fieldConfig['cols'])) {
+                    foreach ($fieldConfig['cols'] as $key => $col) {
+                        if ($col['type'] === 'entrySelect') {
+                            $rows = $propertyModel->properties[$propertyConfig['handle']];
+                            if ($rows) {
+                                foreach ($rows as $row) {
+                                    if ($row[$key]) {
+                                        $ids[] = $row[$key];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         return $ids;
     }
 
-    private function expandPropertySet($propertiesFieldConfig)
+    private function expandPropertySet($propertiesFieldConfig, bool $expandTableCriteria = true)
     {
         $newConfig = [];
         foreach ($propertiesFieldConfig as $i => $config) {
@@ -387,6 +410,37 @@ class Properties extends Field implements RelationalFieldInterface
                 }
             } else {
                 $newConfig[] = $config;
+            }
+        }
+
+        if ($expandTableCriteria) {
+            foreach ($newConfig as $i => $config) {
+
+                if ($config['type'] == 'table' && $config['fieldConfig']) {
+                    $fieldConfig = json_decode($config['fieldConfig'], true);
+                    if (isset($fieldConfig['cols'])) {
+                        foreach ($fieldConfig['cols'] as $j => $col) {
+                            if (isset($col['type']) && $col['type'] == 'entrySelect' && isset($col['criteria'])) {
+                                $query = Entry::find();
+                                Craft::configure($query, $col['criteria']);
+                                $entries = $query->withCustomFields(false)->all();
+
+                                $fieldConfig ['cols'][$j]['type'] = 'select';
+                                $fieldConfig ['cols'][$j]['options'] = array_merge(
+                                    [['value' => '', 'label' => '-']],
+                                    array_map(function($entry) {
+                                        return [
+                                            'value' => $entry->id,
+                                            'label' => $entry->title,
+                                        ];
+                                    }, $entries)
+                                );
+
+                                $newConfig[$i]['fieldConfig'] = json_encode($fieldConfig);
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -455,6 +509,5 @@ class Properties extends Field implements RelationalFieldInterface
         if ($property['required'] && !$value['quantity']) {
             $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'Quantity cannot be blank.'));
         }
-
     }
 }

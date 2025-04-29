@@ -76,6 +76,13 @@ class Settings extends Model
             'normalize' => [PropertiesModel::class, 'normalizeEntry'],
             'validate' => [[Properties::class, 'validateRequired']],
         ],
+        'entrySelect' => [
+            'label' => 'Entry Select',
+            'type' => 'entrySelect',
+            'template' => '_properties-field/_inputs/entrySelect.twig',
+            'normalize' => [PropertiesModel::class, 'normalizeEntry'],
+            'validate' => [[Properties::class, 'validateRequired']],
+        ],
         'entries' => [
             'label' => 'Entry (Multi)',
             'type' => 'entries',
@@ -96,6 +103,11 @@ class Settings extends Model
             'template' => '_properties-field/_inputs/elementSelect.twig',
             'normalize' => [PropertiesModel::class, 'normalizeAssets'],
             'validate' => [[Properties::class, 'validateRequired']],
+        ],
+        'table' => [
+            'label' => 'Table',
+            'type' => 'table',
+            'template' => '_properties-field/_inputs/table.twig',
         ],
         'extendedBoolean' => [
             'label' => 'Boolean with comment',

@@ -145,16 +145,21 @@ Property types configuration: A list of properties to be displayed in the field.
     * Select: A select field with options
     * Date: A date field
     * Entry/Entries: An entries field with one or multiple entries
+    * Entry Select: A select field with one entry. Allows to select an entry without opening the selection modal.
     * Asset/Assets: An assets field with one or multiple assets
     * Boolean with comment: A boolean field combined with a comment field (experimental)
+    * Table: A table field with configurable columns, incl. entry selection (experimental). See the Table property type
+      section below.
     * Dimension: Combines a number field with a text field for the unit (experimental)
     * Dynamic property set. See 'Dynamic property config' below.
 * Options: The options for the field. The following options are supported:
     * Select: A list of options for the select field, in the format `value:label`
     * Entry/Entries: A comma-separated list of section handles
+    * Entry Select: Query conditions in JSON format, e.g.:
+        * `{"section": "person", "orderBy": "lastName, firstName"}`
     * Asset/Assets:  A comma-separated list of volume handles
     * Dynamic property set: The slug of the entry that holds the property set. See 'Dynamic property config' below.
-* Field Config: A JSON string with additional field config settings.
+* Field Config: A JSON string with additional field config settings. (Tip: This is hard to edit in the CP, so use a json editor (like PhpStorms scratch files) and copy/paste it into the field config box.)
 
   This is merged into the field config object of the corresponding Craft forms macro, so you can use any settings supported by the field type. For example:
     * `{"placeholder": "placeholder text"}` for a text field
@@ -175,7 +180,46 @@ craft _properties-field/set-default entryTypeHandle fieldHandle propertyHandle v
 
 Handles only scalar values for now.
 
-```bash
+### Table property type
+
+Experimental, work in progress.
+
+The table property type allows to define a table with a configurable number of columns.
+
+![Table property type](images/table-input.jpg)
+
+By default, a table with a single `text` column is created.
+
+The `Field Config` setting allows to define the columns of the table. This is a JSON string with settings that Craft's `editableTable`form macro accepts.
+
+Additionally, instead of providing a static `options` array for the `select` column type, you can provide a pseudo `entrySelect` column type with a `criteria` key with query conditions in JSON format. 
+This will dynamically build options with the entry id as value and the entry title as label.
+
+```json
+{
+  "addRowLabel": "Add a team member",
+  "cols": {
+    "entry": {
+      "heading": "Entry",
+      "type": "entrySelect",
+      "width": "150px",
+      "criteria": {
+        "section": "person",
+        "orderBy": "title"
+      }
+    },
+    "active": {
+      "heading": "Active",
+      "type": "lightswitch",
+      "width": "100px"
+    },
+    "comment": {
+      "heading": "Comment",
+      "type": "singleline"
+    }
+  }
+}
+```
 
 ## Dynamic property config
 
