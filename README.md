@@ -281,7 +281,7 @@ Experimental approach:
 
 The field value is an instance of `wsydney76\propertiesfield\models\PropertiesModel` (or null if not set).
 
-Access the properties directly:
+### Access the raw values:
 
 ```twig
 entry.fieldHandle.properties
@@ -293,6 +293,21 @@ However, this is not recommended, as this reflects the raw database content, whe
 order, e.g. when the field config was updated after an entry was saved.
 
 So always code defensively and check for the existence or type of property before using it.
+
+### Access via JsonData
+
+Starting with Craft 5.7, you can access the configured properties via the `JsonData` class, which allows to use the same methods as
+for the standard Craft JSON field (see [Docs](https://craftcms.com/docs/5.x/reference/field-types/json.html#development)).
+
+```twig
+{% set props = entry.fieldHandle.getJsonData() %}
+```
+
+Properties that are not set in the database are will have a `null` value.
+
+### Access the normalized values:
+
+```twig
 
 Loop over all properties:
 
