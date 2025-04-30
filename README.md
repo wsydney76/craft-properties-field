@@ -448,12 +448,6 @@ return [
             'template' => '_properties-field-inputs/demo.twig',
             'normalize' => [MyPropertiesModel::class, 'normalizeDemo'], // Optional, see callbacks section below
             'validate' => [[MyPropertiesModel::class, 'validateDemo']], // Optional, see callbacks section below
-        ],
-        'languages' => [
-            'label' => 'Languages',
-            'type' => 'languages',
-            'template' => '_properties-field-inputs/languages.twig',
-            'validate' => [[MyPropertiesModel::class, 'validateLanguages']],
         ]
     ],
 ];
@@ -512,30 +506,6 @@ Use multiple inputs with sub-keys for each input:
 ```
 
 Anything that is posted from fields is stored 'as is' in the database json field.
-
-```twig
-{% import '_includes/forms.twig' as forms %}
-
-<div style="padding: 16px 8px 8px 8px; ">
-    {{ forms.editableTable({
-        id: propertyConfig.handle,
-        name: propertyConfig.handle,
-        addRowLabel: 'Add a language'|t,
-        allowAdd: true,
-        allowReorder: true,
-        allowDelete: true,
-        cols: {
-            language: {heading: 'Language'|t, type: 'singleline'},
-            level: {heading: 'Level'|t, type: 'select', width: '150px', options: [
-                {label: 'Native speaker'|t, value: 'native'},
-                {label: 'Expert'|t, value: 'expert'},
-                {label: 'Beginner'|t, value: 'beginner'},
-            ]}
-        },
-        rows: value
-    }) }}
-</div>
-```
 
 ### Search custom property types
 
