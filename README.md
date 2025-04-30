@@ -179,7 +179,9 @@ settings:
     * `{"offLabel": "labelText","onLabel": "labelText"}` for a boolean field
     * `{"min": 0,"max": 100,"step": 5}` for a number field
 
-  Supported for text/email/number, textarea, boolean, select, date, entries/assets property types.
+  Supported for text/email/number, textarea, boolean, select, date, entries/assets, table property types.
+
+Tip/Warning: Show a tip/warning. This allows to have consistent settings across all usages. Unlike instructions, tips/warnings added in a field layout do not override the field settings.
 
 ### Defaults
 
@@ -379,6 +381,7 @@ Each property is an array with the following keys:
     * `entries/assets`: An array of elements (or empty array)
     * `select`: An instance of `craft\fields\data\SingleOptionFieldData`. See Craft CMS documentation of the Dropdown
       field for more details.
+    * `boolean with comment`: A string with (translated) Yes/No, and a comment string, e.g. `Yes (Expert level)`
     * `other`: The raw value
 
 The config is available via the `propertiesFieldConfig` property:

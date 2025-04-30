@@ -31,6 +31,8 @@ class Properties extends Field implements RelationalFieldInterface
 
     public array $propertiesFieldConfig = [];
     public string $color = '';
+    public string $tip = '';
+    public string $warning = '';
 
     public static function displayName(): string
     {
@@ -162,6 +164,24 @@ class Properties extends Field implements RelationalFieldInterface
                 'rows' => $this->propertiesFieldConfig,
                 'errors' => $this->getErrors('propertiesFieldConfig'),
                 'data' => ['error-key' => 'options'],
+            ]) .
+            Cp::textareaFieldHtml([
+                'label' => Craft::t('_properties-field', 'Tip'),
+                'name' => 'tip',
+                'value' => $this->tip,
+                'id' => 'tip',
+                'class' => 'nicetext',
+                'rows' => 1,
+                'warning' => Craft::t('_properties-field', 'This will be shown on every instance of the field and cannot be overwritten.')
+            ]).
+            Cp::textareaFieldHtml([
+                'label' => Craft::t('_properties-field', 'Warning'),
+                'name' => 'warning',
+                'value' => $this->warning,
+                'id' => 'warning',
+                'class' => 'nicetext',
+                'rows' => 1,
+                'warning' => Craft::t('_properties-field', 'This will be shown on every instance of the field and cannot be overwritten.')
             ]);
     }
 

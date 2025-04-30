@@ -35,7 +35,8 @@
                 </tr>
             {% else %}
                 <tr>
-                    <th class="heading-cell thin" style="background-color: var(--{{ color }}-050); text-align: left; padding: 7px;">
+                    <th class="heading-cell thin"
+                        style="background-color: var(--{{ color }}-050); text-align: left; padding: 7px;">
                         {{ propertyConfig.name|t }}
                         {% if propertyConfig.instructions ?? null %}
                             <span class="info">
@@ -63,6 +64,17 @@
         {% endfor %}
         </tbody>
     </table>
+
+    {% if field.tip %}
+        <div id="tip" class="notice has-icon"><span class="icon" aria-hidden="true"></span><span
+                    class="visually-hidden">Tip: </span><span>{{ field.tip|md|purify }}</span></div>
+    {% endif %}
+
+    {% if field.warning %}
+        <div id="warning" class="warning has-icon"><span class="icon" aria-hidden="true"></span><span
+                    class="visually-hidden">Warning: </span><span>{{ field.warning|md|purify }}</span>
+        </div>
+    {% endif %}
 
 {% endnamespace %}
 
