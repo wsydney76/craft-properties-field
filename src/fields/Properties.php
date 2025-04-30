@@ -514,6 +514,15 @@ class Properties extends Field implements RelationalFieldInterface
         }
     }
 
+
+    /**
+     * Undocumented, making this fully functional is out of scope for now
+     *
+     * @param array $instances
+     * @param mixed $value
+     * @param array $params
+     * @return array|string|ExpressionInterface|false|null
+     */
     public static function queryCondition(array $instances, mixed $value, array &$params): array|string|ExpressionInterface|false|null
     {
         // Provisional implementation

@@ -251,8 +251,10 @@ Experimental approach:
   only be used for the whole field, not for sub-fields.
 * No out-of-the-box validation for sub-fields, validation errors cannot be attached to a sub-field.
 * No fancy UI for extended sub-field settings.
-* Does not support conditional logic.
+* Does not support conditional logic for sub-fields.
 * Eager loading of elements is not supported.
+* Does not support standard Craft queries for custom fields.
+* Does not support element-index columns.
 
 
 
@@ -361,34 +363,43 @@ entry.fieldHandle.getNormalized('subfieldHandle') // normalized value
 
 ### Querying
 
-Entries can be queried via the following entry query methods:
+The standard Craft way of querying for custom field values does not work out of the box, as the field is stored in a JSON format with multiple sub-fields, representing not just 'one' value, but 'a set of values'.
 
-* `.fieldHandle({subFieldhandle: value})` (for scalar values, where subFieldHandle can be a path). 
-* `.fieldHandle({subFieldhandle: value, searchInArray: true})` (for array elements, e.g. entries/assets property types)
+As a workaround, the plugin provides a set of query methods that can be used to query for entries/assets with specific property values.
+
+* `propEquals()` (for scalar values, uses `=` in the SQL query)
+* `propLike()` (for scalar values, uses `LIKE` in the SQL query)
+* `propContains()` (for array elements, e.g. entries/assets property types)
 
 ```twig
+.propEquals('entryTypeHandle', 'fieldHandle', 'subfieldHandle', 'value')
+
 {% set entries = craft.entries
-    .type('propertiesPersonalData')
-    .personalData({gender: 'm'})
+    .propEquals('person', 'personalData', 'age', '33')
 .all %}
 
-{# path #}
 {% set entries = craft.entries
-    .type('propertiesSkills')
-    .skills({'vue.isOn': '1'})
-.all %}
-
-{# search for value in array #}
-{% set entries = craft.entries
-    .type('propertiesPersonalData')
-    .personalData({relatedPosts: '5231', searchInArray: true})
-.all %}
+    .propEquals('propertyTest2', 'skills', 'vue.isOn', '1')
+.all
 %}
+
+{% set entries = craft.entries
+    .propEquals('person', 'personalData', 'gender', 'm')
+    .propEquals('person', 'personalData', 'name', 'Karl')
+.all
+%}
+
+{% set entries = craft.entries
+    .propLike('person', 'personalData', 'name', 'Erna')
+.all
+%}
+
+{% set entries = craft.entries
+    .propContains('person', 'personalData', 'relatedPosts', '5098')
+.all
+%}
+
 ```
-
-TODO: Supports only a single field instance for now, so requires an entry type param if ambiguous.
-
-
 
 ### Relations
 

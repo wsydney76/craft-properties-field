@@ -45,6 +45,13 @@ class PropertiesFieldPlugin extends Plugin
                     $event->types[] = Properties::class;
                 });
 
+            Event::on(
+                EntryQuery::class,
+                Query::EVENT_DEFINE_BEHAVIORS,
+                function(DefineBehaviorsEvent $event) {
+                    $event->behaviors[] = EntryQueryBehavior::class;
+                });
+
             if ($this->settings->customInputTemplateDir) {
 
                 Event::on(
