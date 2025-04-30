@@ -48,6 +48,18 @@ class EntryQueryBehavior extends Behavior
         return $this->owner;
     }
 
+    public function propIsOn(string $entryTypeHandle, string $fieldHandle, string $prop): EntryQuery
+    {
+        $field = $this->getField($entryTypeHandle, $fieldHandle);
+
+        $sql = sprintf("JSON_UNQUOTE(JSON_EXTRACT(content, '$.\"%s\".%s.isOn')) = '1'", $field->layoutElement->uid, $prop);
+
+        // "JSON_UNQUOTE(JSON_EXTRACT(content, '$.\"0f8cec2a-3764-4546-a7e0-6429150b66ca\".name')) = 'Karl'"
+
+        $this->owner->andWhere(new Expression($sql));
+        return $this->owner;
+    }
+
     /**
      * @param string $entryTypeHandle
      * @param string $fieldHandle

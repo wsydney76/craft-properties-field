@@ -370,6 +370,7 @@ As a workaround, the plugin provides a set of query methods that can be used to 
 * `propEquals()` (for scalar values, uses `=` in the SQL query)
 * `propLike()` (for scalar values, uses `LIKE` in the SQL query)
 * `propContains()` (for array elements, e.g. entries/assets property types)
+* `propIsOn()` (for 'Boolean with comment' property type)
 
 ```twig
 .propEquals('entryTypeHandle', 'fieldHandle', 'subfieldHandle', 'value')
@@ -396,6 +397,11 @@ As a workaround, the plugin provides a set of query methods that can be used to 
 
 {% set entries = craft.entries
     .propContains('person', 'personalData', 'relatedPosts', '5098')
+.all
+%}
+
+{% set entries = craft.entries
+    .propIsOn('person', 'skills', 'craft')
 .all
 %}
 
