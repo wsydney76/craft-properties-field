@@ -121,6 +121,8 @@ This means that all values are stored as strings, including numbers and element 
 }
 ````
 
+Just in case: The field can be safely converted to the Craft 5.7 JSON field type without data loss.
+
 ## Settings
 
 ### Plugin settings

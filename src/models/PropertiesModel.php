@@ -7,6 +7,7 @@ use craft\base\ElementInterface;
 use craft\base\Model;
 use craft\elements\Asset;
 use craft\elements\Entry;
+use craft\fields\data\JsonData;
 use craft\fields\data\SingleOptionFieldData;
 use craft\helpers\DateTimeHelper;
 use Exception;
@@ -293,6 +294,27 @@ class PropertiesModel extends Model
         }
 
         return $string;
+    }
+
+    public function getJsonData()
+    {
+        if (version_compare(Craft::$app->getVersion(), '5.7.0', '<')) {
+            throw new InvalidConfigException('Craft 5.7 or higher is required to use the JSON data type.');
+        }
+
+        $props = [];
+
+        foreach ($this->propertiesFieldConfig as $propertyConfig) {
+            $value = $this->properties[$propertyConfig['handle']] ?? null;
+                $props[$propertyConfig['handle']] = $value;
+        }
+        return new JsonData($props);
+    }
+
+    public function __toString(): string
+    {
+        // JsonData returns a string representation of the JSON data
+        return (string)$this->getJsonData();
     }
 
 }
