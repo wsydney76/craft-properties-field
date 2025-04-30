@@ -520,11 +520,6 @@ Event::on(
             case 'demo':
                 $event->keywords .= ' ' . $event->property['normalizedValue']['comment'];
                 break;
-            case 'languages':
-                foreach ($event->property['normalizedValue'] as $language) {
-                    $event->keywords .= ' ' . $language['language'];
-                }
-                break;
         }
     }
 
