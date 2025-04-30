@@ -1,7 +1,7 @@
 {
   "name": "wsydney76/craft-properties-field",
   "description": "Adds a properties field type",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
   "type": "craft-plugin",
   "license": "MIT",
   "require": {

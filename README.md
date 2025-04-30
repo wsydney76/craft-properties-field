@@ -10,7 +10,7 @@ This plugin is tested with Craft CMS 5.7, MySql 8.0 and PHP 8.3.
 
 Feature freeze for now.
 
-Tagged 1.0.0-beta.2 as an MVP (minimum viable product) version, and started testing and polishing the plugin in parallel
+Tagged 1.0.0-beta.3 as an MVP (minimum viable product) version, and started testing and polishing the plugin in parallel
 with the development of the project for which it is mainly intended.
 
 Won't make sense to push every minor tweak, so we will share a first final version in a couple of weeks (or months...).
@@ -19,7 +19,7 @@ Won't make sense to push every minor tweak, so we will share a first final versi
 
 Add to `composer.json` file in your project root to require this plugin:
 
-Use version `^1.0.0-beta.2` for 'official' releases, or `dev-main` for the latest development version, where anything
+Use version `^1.0.0-beta.3` for 'official' releases, or `dev-main` for the latest development version, where anything
 can go wrong.
 
 ```json
