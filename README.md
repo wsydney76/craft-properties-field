@@ -10,7 +10,8 @@ This plugin is tested with Craft CMS 5.7, MySql 8.0 and PHP 8.3.
 
 Feature freeze for now.
 
-Tagged 1.0.0-beta.2 as an MVP (minimum viable product) version, and started testing and polishing the plugin in parallel with the development of the project for which it is mainly intended.
+Tagged 1.0.0-beta.2 as an MVP (minimum viable product) version, and started testing and polishing the plugin in parallel
+with the development of the project for which it is mainly intended.
 
 Won't make sense to push every minor tweak, so we will share a first final version in a couple of weeks (or months...).
 
@@ -18,7 +19,8 @@ Won't make sense to push every minor tweak, so we will share a first final versi
 
 Add to `composer.json` file in your project root to require this plugin:
 
-Use version `^1.0.0-beta.2` for 'official' releases, or `dev-main` for the latest development version, where anything can go wrong.
+Use version `^1.0.0-beta.2` for 'official' releases, or `dev-main` for the latest development version, where anything
+can go wrong.
 
 ```json
 {
@@ -48,7 +50,8 @@ ddev craft plugin/install _properties-field
 Fill a gap in Craft CMS for a field type that allows you to define a set of properties for an element.
 
 While the table field in static rows mode lacks support for restructuring content and different field types, the matrix
-field doesn't provide a good UX for this purpose. Craft also has limited support for organizing a field layout in real columns.
+field doesn't provide a good UX for this purpose. Craft also has limited support for organizing a field layout in real
+columns.
 
 This is an extended version of a plugin used for years in a private project, updated to support more field types and
 Craft 5 features.
@@ -76,13 +79,18 @@ Work in progress. Not tested in a multi-site environment.
 ![Field input](images/field-input2.jpg)
 ![Field settings](images/field-settings2.jpg)
 
-(This kind of setup is actually one of the main use cases for this plugin, as it allows to add/remove/rearrange properties consistently without creating a myriad of fields/matrix blocks.)
+This kind of setup is actually one of the main use cases for this plugin, as it allows to add/remove/rearrange
+properties consistently without creating a myriad of fields/matrix blocks.
+
+See the [Templating](#templating) section for more details on how to output/search this in your templates.
 
 ## Storage
 
-The field stores the data posted from the edit form "as-is" in a JSON field (just date fields are converted to ISO format).
+The field stores the data posted from the edit form "as-is" in a JSON field (just date fields are converted to ISO
+format).
 
-This means that all values are stored as strings, including numbers and element ids. Lightswitch values are stored as `"1"` or `""`.
+This means that all values are stored as strings, including numbers and element ids. Lightswitch values are stored as
+`"1"` or `""`.
 
 ````json
 {
@@ -126,14 +134,15 @@ This means that all values are stored as strings, including numbers and element 
 
 Color: The background color of group headers and property labels. Defaults to `no color` (aka gray)
 
-Property types configuration: A list of properties to be displayed in the field. Each property has the following settings:
+Property types configuration: A list of properties to be displayed in the field. Each property has the following
+settings:
 
 * Name: The name of the property
 * Handle: The handle of the property (will be built from the name if not set)
 * Instructions: Instructions for the property, displayed in a popup via an `info` icon
 * Required: Whether the property is required
-  * For type `Boolean with comment`, a comment must be provided.
-  * For type `Dimension`, a quantity must be provided.
+    * For type `Boolean with comment`, a comment must be provided.
+    * For type `Dimension`, a quantity must be provided.
 * Search: Whether the property value should be searchable.
 * Type: The type of the property. The following types are supported:
     * Group header: A group header text
@@ -159,20 +168,24 @@ Property types configuration: A list of properties to be displayed in the field.
         * `{"section": "person", "orderBy": "lastName, firstName"}`
     * Asset/Assets:  A comma-separated list of volume handles
     * Dynamic property set: The slug of the entry that holds the property set. See 'Dynamic property config' below.
-* Field Config: A JSON string with additional field config settings. (Tip: This is hard to edit in the CP, so use a json editor (like PhpStorms scratch files) and copy/paste it into the field config box.)
+* Field Config: A JSON string with additional field config settings. (Tip: This is hard to edit in the CP, so use a json
+  editor (like PhpStorms scratch files) and copy/paste it into the field config box.)
 
-  This is merged into the field config object of the corresponding Craft forms macro, so you can use any settings supported by the field type. For example:
+  This is merged into the field config object of the corresponding Craft forms macro, so you can use any settings
+  supported by the field type. For example:
     * `{"placeholder": "placeholder text"}` for a text field
     * `{"offLabel": "labelText","onLabel": "labelText"}` for a boolean field
     * `{"min": 0,"max": 100,"step": 5}` for a number field
-  
+
   Supported for text/email/number, textarea, boolean, select, date, entries/assets property types.
 
 ### Defaults
 
-Intentionally, there is no setting for a default value. This is because we want the field to be used in a way that the properties are always explicitly set by the editor, rather than relying on a random default value.
+Intentionally, there is no setting for a default value. This is because we want the field to be used in a way that the
+properties are always explicitly set by the editor, rather than relying on a random default value.
 
-In case you can't resist, there is an experimental CLI command included that lets you set a value for a property, where it is not already set.
+In case you can't resist, there is an experimental CLI command included that lets you set a value for a property, where
+it is not already set.
 
 ```bash
 craft _properties-field/set-default entryTypeHandle fieldHandle propertyHandle value
@@ -190,9 +203,11 @@ The table property type allows to define a table with a configurable number of c
 
 By default, a table with a single `text` column is created.
 
-The `Field Config` setting allows to define the columns of the table. This is a JSON string with settings that Craft's `editableTable`form macro accepts.
+The `Field Config` setting allows to define the columns of the table. This is a JSON string with settings that Craft's
+`editableTable`form macro accepts.
 
-Additionally, instead of providing a static `options` array for the `select` column type, you can provide a pseudo `entrySelect` column type with a `criteria` key with query conditions in JSON format. 
+Additionally, instead of providing a static `options` array for the `select` column type, you can provide a pseudo
+`entrySelect` column type with a `criteria` key with query conditions in JSON format.
 This will dynamically build options with the entry id as value and the entry title as label.
 
 ```json
@@ -225,22 +240,26 @@ This will dynamically build options with the entry id as value and the entry tit
 
 Experimental, work in progress.
 
-Updating the property types config in a custom field settings updates the project config, which means that a deployment action is needed to get this 'live'.
+Updating the property types config in a custom field settings updates the project config, which means that a deployment
+action is needed to get this 'live'.
 
 This will fit in most cases, especially when updating the config also requires changes in your templates.
 
-However, sometimes a more dynamic approach is needed, allowing privileged editors to change the property config in the database without touching the project config.
+However, sometimes a more dynamic approach is needed, allowing privileged editors to change the property config in the
+database without touching the project config.
 
-Take the 'Skills' example from the screenshots above. This is a list of skills that can be added/removed/rearranged by the editor, and can be output via a generic template.
+Take the 'Skills' example from the screenshots above. This is a list of skills that can be added/removed/rearranged by
+the editor, and can be output via a generic template.
 
 Experimental approach:
 
 * Create a new section/entry type with a field layout containing a `propertiesConfig` table field.
 * This field matches the field settings, a yaml file is included in the plugin's config folder as a starting point.
-  * Copy to `config/project/fields`
-  * Run `ddev craft project-config/apply` to update the project config.
+    * Copy to `config/project/fields`
+    * Run `ddev craft project-config/apply` to update the project config.
 * Create a new entry in this section, and add the properties you want to use.
-* In the fields settings, create a property type with the type `Dynamic property set` and the slug of the entry that holds the property set.
+* In the fields settings, create a property type with the type `Dynamic property set` and the slug of the entry that
+  holds the property set.
 * This will load the configs from the entry and insert them at that position.
 
 ## Limitations
@@ -255,8 +274,6 @@ Experimental approach:
 * Eager loading of elements is not supported.
 * Does not support standard Craft queries for custom fields.
 * Does not support element-index columns.
-
-
 
 ## Templating
 
@@ -316,10 +333,11 @@ Ignores properties that are not in the database. Uses `isset()` internally.
 
 Ignores properties that have an empty value. Uses `empty()` internally.
 
-TODO: Check, what 'empty' means for the different property types. This may work currently as expected for property types that return a scalar value.
+TODO: Check, what 'empty' means for the different property types. This may work currently as expected for property types
+that return a scalar value.
 
-Alternatively, you can check the raw value of the property, `prop.value` will be `null` if the property is not in the database.
-
+Alternatively, you can check the raw value of the property, `prop.value` will be `null` if the property is not in the
+database.
 
 __Set a default value for empty properties:__
 
@@ -329,7 +347,8 @@ __Set a default value for empty properties:__
 {% endfor %}    
 ```
 
-If the property is not set in the database, `prop.value` will be the default value. `prop.normalizedValue` will depend on the type of the property (e.g. null for element selects).
+If the property is not set in the database, `prop.value` will be the default value. `prop.normalizedValue` will depend
+on the type of the property (e.g. null for element selects).
 
 Each property is an array with the following keys:
 
@@ -341,7 +360,8 @@ Each property is an array with the following keys:
     * `date`: A formated date string
     * `entry/asset`: A single element (or null)
     * `entries/assets`: An array of elements (or empty array)
-    * `select`: An instance of `craft\fields\data\SingleOptionFieldData`. See Craft CMS documentation of the Dropdown field for more details.
+    * `select`: An instance of `craft\fields\data\SingleOptionFieldData`. See Craft CMS documentation of the Dropdown
+      field for more details.
     * `other`: The raw value
 
 The config is available via the `propertiesFieldConfig` property:
@@ -363,9 +383,11 @@ entry.fieldHandle.getNormalized('subfieldHandle') // normalized value
 
 ### Querying
 
-The standard Craft way of querying for custom field values does not work out of the box, as the field is stored in a JSON format with multiple sub-fields, representing not just 'one' value, but 'a set of values'.
+The standard Craft way of querying for custom field values does not work out of the box, as the field is stored in a
+JSON format with multiple sub-fields, representing not just 'one' value, but 'a set of values'.
 
-As a workaround, the plugin provides a set of query methods that can be used to query for entries/assets with specific property values.
+As a workaround, the plugin provides a set of query methods that can be used to query for entries/assets with specific
+property values.
 
 * `propEquals()` (for scalar values, uses `=` in the SQL query)
 * `propLike()` (for scalar values, uses `LIKE` in the SQL query)
@@ -421,6 +443,63 @@ param
 TODO: Check why `.relatedTo({targetElement: 5231, field: 'personalData'})` does not work. Use `propContains()` instead.
 
 This does not differentiate between the different sub-fields, so all entries selected by any sub-field are returned.
+
+### Examples: Handling "Boolean with comment" property type
+
+See screenshot of the 'Skills' example above
+
+Output a list of skills:
+
+```twig
+<table class="w-full">
+    {% for prop in entry.skills.getNormalizedProperties({ignoreMissing: true}) %}
+        <tr>
+            <td>
+                {{ prop.name }}
+            </td>
+            <td class="text-right">
+                {{ prop.normalizedValue }}
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+```
+
+Build a search form:
+
+```twig
+{% set skills = craft.app.request.getParam('skills') %}
+{% set field = craft.app.fields.fieldByHandle('skills') %}
+<form>
+...
+<div class="columns-4">
+    {% for prop in field.propertiesFieldConfig %}
+        <label for="skill-{{ prop.handle|id }}">
+            <input id="skill-{{ prop.handle|id }}"
+                   type="checkbox"
+                   name="skills[{{ prop.handle }}]"
+                   {% if skills[prop.handle] is defined %}checked{% endif %}
+            >
+            {{ prop.name }}
+        </label>
+        <br>
+    {% endfor %}
+</div>
+...
+</form>
+```
+
+Build the query:
+
+```twig
+{% set skills = craft.app.request.getParam('skills') %}
+{% set query = craft.entries().section('person').orderBy('title') %}
+
+{% for key, skill in skills %}
+    {% do query.propIsOn('person', 'skills', key) %}
+{% endfor %}
+{% set entries = query.all() %}
+```
 
 ## Extending
 
@@ -555,10 +634,10 @@ class MyPropertiesModel
 }
 ```
 
-
 ## Migrations:
 
-Intentionally, the sub keys are the handles of the properties, not a UID. Which means, changing the handle of a property in the field requires a content migration.
+Intentionally, the sub keys are the handles of the properties, not a UID. Which means, changing the handle of a property
+in the field requires a content migration.
 
 There is an experimental CLI command included, that can be used to update the content in the database.
 
@@ -568,16 +647,15 @@ craft _properties-field/change-handle entryTypeHandle fieldTypeHandle oldPropert
 
 It runs SQL like this to update the content in the database:
 
-
 ```mysql
 UPDATE elements_sites
 SET content = JSON_REMOVE(
-    JSON_SET(
-        content,
-        '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8"."newHandle"',
-        JSON_EXTRACT(content, '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8"."oldHandle"')
-    ),
-    '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8"."oldHandle"'
-)
+        JSON_SET(
+                content,
+                '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8"."newHandle"',
+                JSON_EXTRACT(content, '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8"."oldHandle"')
+        ),
+        '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8"."oldHandle"'
+              )
 WHERE JSON_CONTAINS_PATH(content, 'one', '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8"."oldHandle"');
 ```
