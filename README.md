@@ -197,6 +197,8 @@ craft _properties-field/set-default entryTypeHandle fieldHandle propertyHandle v
 
 Handles only scalar values for now.
 
+For recurring workflows, like adding a new 'skill', you may think of a utility that allows to bulk update the property for all relevant entries at once.
+
 ### Table property type
 
 Experimental, work in progress.
@@ -270,14 +272,20 @@ Experimental approach:
 
 * Only supports a limited set of field types
 * Does not support all possible field settings
-* Craft is not aware of sub-fields, so the whole field is marked as updated on changes, and a translation method can
-  only be used for the whole field, not for sub-fields.
+* Craft is not aware of sub-fields, so the whole field is marked as updated on changes. 
+* A translation method can only be used for the whole field, not for sub-fields.
 * No out-of-the-box validation for sub-fields, validation errors cannot be attached to a sub-field.
 * No fancy UI for extended sub-field settings.
 * Does not support conditional logic for sub-fields.
 * Eager loading of elements is not supported.
 * Does not support standard Craft queries for custom fields.
 * Does not support element-index columns.
+
+Regarding translations:
+
+* Supports `Copy value from other site` for the whole field.
+* Idea: if the field is translatable, making single sub-fields 'not translatable' could be achieved by syncing the values via hooking into save events.
+  See experimental event handler at the end of this doc.
 
 ## Templating
 
@@ -485,6 +493,19 @@ Output a list of skills:
 </table>
 ```
 
+Get a comma-separated list of skills (for use in listings, cards, etc.):
+
+```twig
+{% set skills = entry.skills.getNormalizedProperties({ignoreMissing: true}) %}
+{% set out = [] %}
+{% for skill in skills %}
+    {% if skill.value.isOn %}
+        {% set out = out|push(skill.name) %}
+    {% endif %}
+{% endfor %}
+{{ out|join(', ') }}
+```
+
 Build a search form:
 
 ```twig
@@ -678,4 +699,58 @@ SET content = JSON_REMOVE(
         '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8"."oldHandle"'
               )
 WHERE JSON_CONTAINS_PATH(content, 'one', '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8"."oldHandle"');
+```
+
+## Event handlers
+
+If the field as a whole is translatable, but some sub-fields should be 'not translated', you might use something like the following event handler to sync the values.
+
+Intentionally vague, the project this is mainly developed for are not multi-site, so this is just a first experiment.
+
+In a 'skills' setup as shown in the screenshots, the 'isOn' value of the skills should be synced between the different sites, but the textual comment are language specific.
+
+Trial and error, tbh. I don't fully understand what Craft is doing...
+
+```php
+// In a custom module
+
+private array $skills = [];
+
+private function attachEventHandlers(): void
+{
+    Event::on(
+        Entry::class,
+        Element::EVENT_BEFORE_SAVE,
+        function(ModelEvent $event) {
+            /** @var Entry $entry */
+            $entry = $event->sender;
+
+            if (!$entry->section ||
+                $entry->section->handle !== 'person' ||
+                !ElementHelper::isDraft($entry) ||
+                $entry->resaving
+                // whatever else...
+            ) {
+                return;
+            }
+
+            if (!$entry->propagating) {
+                // This is the first event in sequence, save the current skills for subsequent events
+                $this->skills = $entry->skills->properties;
+            } else {
+                $entry->skills = $this->updateIsOn($this->skills, $entry->skills->properties);
+            }
+        }
+    );
+}
+
+private function updateIsOn(array $source, array $target): array
+{
+    foreach ($source as $key => $sourceValue) {
+        if (isset($target[$key])) {
+            $target[$key]['isOn'] = $sourceValue['isOn'] ?? '';
+        }
+    }
+    return $target;
+}
 ```
