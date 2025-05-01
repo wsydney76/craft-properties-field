@@ -3,6 +3,7 @@
 namespace wsydney76\propertiesfield\fields;
 
 use Craft;
+use craft\base\CrossSiteCopyableFieldInterface;
 use craft\base\ElementInterface;
 use craft\base\Field;
 use craft\base\RelationalFieldInterface;
@@ -25,7 +26,7 @@ use function sprintf;
 /**
  * Properties field type
  */
-class Properties extends Field implements RelationalFieldInterface
+class Properties extends Field implements RelationalFieldInterface, CrossSiteCopyableFieldInterface
 {
     public const EVENT_DEFINE_SEARCH_KEYWORDS = 'defineSearchKeywords';
 
