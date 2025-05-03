@@ -486,11 +486,10 @@ Usage example:
     .andWhere({(seasonSql): 11})
     .type('propertiesFilm')
     .orderBy(expression(episodeSql ~ ' asc'))
-%}
-    
-You may need to use the `expression()` function to avoid incorrect escaping.    
-    
+%} 
 ```
+
+You may need to use the `expression()` function to avoid incorrect escaping.
 
 #### Preparse fields
 
@@ -506,6 +505,20 @@ Now the sub-field can be queried like a normal field:
     .preparseField(['not', 'foo', 'bar'])
 %}
 ```
+
+#### Hardcoded SQL
+
+The UID under which the data of a properties field is stored in Craft's content column is part of the project config, so it does not change between environments.
+
+So it feels safe to hard code the SQL statements, if you prefer that.
+
+```twig
+{% set query = craft.entries
+    .andWhere("content->>'$.\"dcf26874-1610-482f-933d-867fddf8b403\".craft.isOn' = '1'")
+%}
+```
+
+Look in `/config/project/entrytypes/yourEntryType-....yaml` for `fieldlayouts > [fieldLayoutUid] > tabs > elements > yourField > uid`
 
 ### Relations
 
