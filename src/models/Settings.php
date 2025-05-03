@@ -19,6 +19,8 @@ class Settings extends Model
     public string $entriesViewMode = 'cards';
     public string $assetsViewMode = 'cards';
 
+    public bool $enableElementQueryHelpers = false;
+
     public array $propertiesConfig = [
         'text' => [
             'label' => 'Text',

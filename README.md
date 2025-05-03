@@ -417,44 +417,94 @@ JSON format with multiple sub-fields, representing not just 'one' value, but 'a 
 As a workaround, the plugin provides a set of query methods that can be used to query for entries/assets with specific
 property values.
 
+* Enable the `Enable element query helpers` setting.
+* A properties field can be accessed in the form `entryTypeHandle.fieldHandle` or `fieldHandle` if the field is used in multiple entry types.
+
+#### Query methods
+
+The following query methods are available via a behavior:
+
 * `propEquals()` (for scalar values, uses `=` in the SQL query)
 * `propLike()` (for scalar values, uses `LIKE` in the SQL query)
 * `propContains()` (for array elements, e.g. entries/assets property types)
 * `propIsOn()` (for 'Boolean with comment' property type)
 
+
 ```twig
-.propEquals('entryTypeHandle', 'fieldHandle', 'subfieldHandle', 'value')
+.propEquals('entryTypeHandle.fieldHandle', 'subfieldHandle', 'value')
+.propEquals('fieldHandle', 'subfieldHandle', 'value')
 
 {% set entries = craft.entries
-    .propEquals('person', 'personalData', 'age', '33')
+    .propEquals('personalData', 'age', '33')
 .all %}
 
 {% set entries = craft.entries
-    .propEquals('propertyTest2', 'skills', 'vue.isOn', '1')
+    .propEquals('propertyTest2.skills', 'vue.isOn', '1')
 .all
 %}
 
 {% set entries = craft.entries
-    .propEquals('person', 'personalData', 'gender', 'm')
-    .propEquals('person', 'personalData', 'name', 'Karl')
+    .propEquals('personalData', 'gender', 'm')
+    .propEquals('personalData', 'name', 'Karl')
 .all
 %}
 
 {% set entries = craft.entries
-    .propLike('person', 'personalData', 'name', 'Erna')
+    .propLike('person.personalData', 'name', 'Erna')
 .all
 %}
 
 {% set entries = craft.entries
-    .propContains('person', 'personalData', 'relatedPosts', '5098')
+    .propContains('person.personalData', 'relatedPosts', '5098')
 .all
 %}
 
 {% set entries = craft.entries
-    .propIsOn('person', 'skills', 'craft')
+    .propIsOn('skills', 'craft')
 .all
 %}
 
+```
+
+#### Advanded queries
+
+Experimental, work in progress.
+
+A `propValueSql(fieldIdent, prop [, cast])` method is available in twig that returns a SQL string that can be used in a query (`PropertiesFieldHelper::propValueSql()` for PHP).
+
+* `propValueSql('propertiesFilm.filmProps', 'seasonEpisode.season')` => `JSON_UNQUOTE(JSON_EXTRACT(content, '$."1cdf8ca4-f462-4ab7-a19a-9a2df1ee1bba".seasonEpisode.season'))`
+* `propValueSql('propertiesFilm.filmProps', 'seasonEpisode.episode', 'SIGNED')` => `CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$."1cdf8ca4-f462-4ab7-a19a-9a2df1ee1bba".seasonEpisode.episode')) AS SIGNED)`
+* `propValueSql('profile', 'seasonEpisode.episode', 'SIGNED')` => `COALESCE(JSON_UNQUOTE(JSON_EXTRACT(content, '$."79e7fc9f-5cff-41c5-bbd3-c5dff87e34f4".name')), JSON_UNQUOTE(JSON_EXTRACT(content, '$."6d9b91f3-ffac-450b-ba63-3a632a1b1dd1".name')))`
+
+Usage example:
+
+```twig
+{% set seasonSql = propValueSql('propertiesFilm.filmProps', 'seasonEpisode.season') %}
+{% set episodeSql = propValueSql('filmProps', 'seasonEpisode.episode', 'SIGNED') %}
+
+{% set query = craft.entries
+    .andWhere({(seasonSql): 11})
+    .type('propertiesFilm')
+    .orderBy(expression(episodeSql ~ ' asc'))
+%}
+    
+You may need to use the `expression()` function to avoid incorrect escaping.    
+    
+```
+
+#### Preparse fields
+
+If you want to execute more advanced queries on a sub-field, the [Preparse plugin](https://github.com/jalendport/craft-preparse) can be used.
+
+E.g. for querying a number field, you can create a new preparse field with the number value, and then use
+`{{ element.fieldHandle.get('propertyHandle') }}` for the `Twig code to parse` setting. Make sure values are converted to the correct type depending on the `column type` setting.
+
+Now the sub-field can be queried like a normal field:
+
+```twig
+{% set query = craft.entries
+    .preparseField(['not', 'foo', 'bar'])
+%}
 ```
 
 ### Relations

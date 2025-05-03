@@ -15,6 +15,7 @@ use craft\web\View;
 use wsydney76\propertiesfield\behaviors\EntryQueryBehavior;
 use wsydney76\propertiesfield\fields\Properties;
 use wsydney76\propertiesfield\models\Settings;
+use wsydney76\propertiesfield\web\twig\PropertiesFieldExtension;
 
 /**
  * Properties Field plugin
@@ -45,12 +46,17 @@ class PropertiesFieldPlugin extends Plugin
                     $event->types[] = Properties::class;
                 });
 
-            Event::on(
-                EntryQuery::class,
-                Query::EVENT_DEFINE_BEHAVIORS,
-                function(DefineBehaviorsEvent $event) {
-                    $event->behaviors[] = EntryQueryBehavior::class;
-                });
+            if ($this->settings->enableElementQueryHelpers) {
+                Event::on(
+                    EntryQuery::class,
+                    Query::EVENT_DEFINE_BEHAVIORS,
+                    function(DefineBehaviorsEvent $event) {
+                        $event->behaviors[] = EntryQueryBehavior::class;
+                    });
+
+                Craft::$app->view->registerTwigExtension(new PropertiesFieldExtension());
+
+            }
 
             if ($this->settings->customInputTemplateDir) {
 
@@ -65,6 +71,7 @@ class PropertiesFieldPlugin extends Plugin
             }
 
         });
+
     }
 
     private function attachEventHandlers(): void

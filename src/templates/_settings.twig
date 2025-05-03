@@ -41,6 +41,15 @@
     warning: config.customInputTemplateDir is defined ? _self.configWarning('customInputTemplateDir')
 }) }}
 
+
+{{ forms.lightswitchField({
+    label: 'Enable element query helpers'|t('_properties-field'),
+    name: 'enableElementQueryHelpers',
+    on: settings.enableElementQueryHelpers,
+    onLabel: 'Enable methods like propEquals(), propValueSql()...'|t('_properties-field'),
+    warning: config.enableElementQueryHelpers is defined ? _self.configWarning('enableElementQueryHelpers')
+}) }}
+
 {% macro configWarning(setting) -%}
     {{ 'This is being overridden by the `{setting}` config setting and cannot be changed here.'|t('_properties-field', {setting: setting })|markdown(inlineOnly=true) }}
 {%- endmacro %}

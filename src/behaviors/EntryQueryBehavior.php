@@ -4,8 +4,10 @@ namespace wsydney76\propertiesfield\behaviors;
 
 use Craft;
 use craft\elements\db\EntryQuery;
+use wsydney76\propertiesfield\helpers\PropertiesFieldHelper;
 use yii\base\Behavior;
 use yii\db\Expression;
+use function str_replace;
 
 /**
  * Entry Query Behavior behavior
@@ -14,11 +16,10 @@ use yii\db\Expression;
  */
 class EntryQueryBehavior extends Behavior
 {
-    public function propEquals(string $entryTypeHandle, string $fieldHandle, string $prop, string $value): EntryQuery
+    public function propEquals(string $fieldIdent, string $prop, string $value): EntryQuery
     {
-        $field = $this->getField($entryTypeHandle, $fieldHandle);
-
-        $sql = sprintf("JSON_UNQUOTE(JSON_EXTRACT(content, '$.\"%s\".%s')) = '%s'", $field->layoutElement->uid, $prop, $value);
+        $sql = PropertiesFieldHelper::propValueSql($fieldIdent, $prop );
+        $sql = sprintf("(%s = '%s')", $sql, $value);
 
         // "JSON_UNQUOTE(JSON_EXTRACT(content, '$.\"0f8cec2a-3764-4546-a7e0-6429150b66ca\".name')) = 'Karl'"
 
@@ -26,35 +27,36 @@ class EntryQueryBehavior extends Behavior
         return $this->owner;
     }
 
-    public function propLike(string $entryTypeHandle, string $fieldHandle, string $prop, string $value): EntryQuery
+    public function propLike(string $fieldIdent, string $prop, string $value): EntryQuery
     {
-        $field = $this->getField($entryTypeHandle, $fieldHandle);
-
-        $sql = sprintf("JSON_UNQUOTE(JSON_EXTRACT(content, '$.\"%s\".%s')) LIKE '%%%s%%'", $field->layoutElement->uid, $prop, $value);
+        $sql = PropertiesFieldHelper::propValueSql($fieldIdent, $prop);
+        $sql = sprintf("%s LIKE '%%%s%%'", $sql, $value);
 
         $this->owner->andWhere(new Expression($sql));
         return $this->owner;
     }
 
-    public function propContains(string $entryTypeHandle, string $fieldHandle, string $prop, string $value): EntryQuery
+    public function propContains(string $fieldIdent, string $prop, string $value): EntryQuery
     {
-        $field = $this->getField($entryTypeHandle, $fieldHandle);
+        $sql = PropertiesFieldHelper::propValueSql($fieldIdent, $prop);
 
+        // Hack
+        $sql = str_replace('JSON_UNQUOTE', 'JSON_CONTAINS', $sql);
+        $sql = str_replace('))', '), \'"%s"\')', $sql);
+        $sql = sprintf($sql, $value);
 
-        $sql = sprintf("JSON_CONTAINS(JSON_EXTRACT(content, '$.\"%s\".%s'), '\"%s\"')", $field->layoutElement->uid, $prop, $value);
         // JSON_CONTAINS(JSON_EXTRACT(your_json_column, '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8".multiImage'), '"45"')
 
         $this->owner->andWhere(new Expression($sql));
         return $this->owner;
     }
 
-    public function propIsOn(string $entryTypeHandle, string $fieldHandle, string $prop): EntryQuery
+    public function propIsOn(string $fieldIdent, string $prop): EntryQuery
     {
-        $field = $this->getField($entryTypeHandle, $fieldHandle);
+        $sql = PropertiesFieldHelper::propValueSql($fieldIdent, $prop);
 
-        $sql = sprintf("JSON_UNQUOTE(JSON_EXTRACT(content, '$.\"%s\".%s.isOn')) = '1'", $field->layoutElement->uid, $prop);
-
-        // "JSON_UNQUOTE(JSON_EXTRACT(content, '$.\"0f8cec2a-3764-4546-a7e0-6429150b66ca\".name')) = 'Karl'"
+        // Hack
+        $sql = str_replace("'))", ".isOn')) = '1'", $sql);
 
         $this->owner->andWhere(new Expression($sql));
         return $this->owner;
