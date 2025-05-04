@@ -466,7 +466,7 @@ The following query methods are available via a behavior:
 
 ```
 
-#### Advanded queries
+#### Advanced queries
 
 Experimental, work in progress.
 
@@ -531,9 +531,12 @@ param
 .all %}
 ```
 
-TODO: Check why `.relatedTo({targetElement: 5231, field: 'personalData'})` does not work. Use `propContains()` instead.
-
 This does not differentiate between the different sub-fields, so all entries selected by any sub-field are returned.
+
+Using the field param like in `.relatedTo({targetElement: 5231, field: 'personalData'})` will not work. 
+Craft only supports this for fields extending `BaseRelationField`.
+
+Use `propContains()` instead.
 
 ### Examples: Handling "Boolean with comment" property type
 
