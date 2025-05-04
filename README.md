@@ -538,6 +538,10 @@ Craft only supports this for fields extending `BaseRelationField`.
 
 Use `propContains()` instead.
 
+### GraphQL
+
+Like Craft's native [JSON fields](https://craftcms.com/docs/5.x/reference/field-types/json.html#graphql), Property fields are treated like plain strings, when queried via GraphQL. Values must be deserialized in the client or app.
+
 ### Examples: Handling "Boolean with comment" property type
 
 See screenshot of the 'Skills' example above
@@ -603,7 +607,7 @@ Build the query:
 {% set query = craft.entries().section('person').orderBy('title') %}
 
 {% for key, skill in skills %}
-    {% do query.propIsOn('person', 'skills', key) %}
+    {% do query.propIsOn('person.skills', key) %}
 {% endfor %}
 {% set entries = query.all() %}
 ```
