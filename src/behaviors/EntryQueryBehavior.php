@@ -42,7 +42,7 @@ class EntryQueryBehavior extends Behavior
 
         // Hack
         $sql = str_replace('JSON_UNQUOTE', 'JSON_CONTAINS', $sql);
-        $sql = str_replace('))', '), \'"%s"\')', $sql);
+        $sql = str_replace('))', '), JSON_QUOTE(\'%s\'))', $sql);
         $sql = sprintf($sql, $value);
 
         // JSON_CONTAINS(JSON_EXTRACT(your_json_column, '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8".multiImage'), '"45"')

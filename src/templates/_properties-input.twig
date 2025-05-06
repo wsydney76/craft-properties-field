@@ -12,20 +12,40 @@
     {% set color = 'gray' %}
 {% endif %}
 
-
 {% namespace field.handle %}
     <table class="editable fullwidth">
 
-        {% if settings.showTableHeader %}
-            <thead>
+        <tbody>
+        {% if field.icon or field.heading or field.heading2 %}
             <tr>
-                <th scope="col" class="singleline-cell textual">{{ 'Property'|t }}</th>
-                <th scope="col" class="multiline-cell textual">{{ 'Value'|t }}</th>
+                <td colspan="2" class="singleline-cell textual"
+                    style="background-color: var(--{{ color }}-100); padding: 8px 8px;">
+                    <div class="card-titlebar">
+                        <div class="flex flex-nowrap flex-gap-s">
+                            {% if field.icon %}
+                                <div class="cp-icon small">
+                                    {{ svg("@appicons/#{field.icon}.svg") }}
+                                </div>
+                            {% endif %}
+                            {% if field.heading %}
+                                <div class="card-titlebar-label">
+                                    <strong>{{ field.heading|t }}</strong>
+                                </div>
+                            {% endif %}
+                            {% if field.heading2 %}
+                                {% if field.heading %}
+                                    -
+                                {% endif %}
+                                {{ field.heading2|t }}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </td>
             </tr>
-            </thead>
         {% endif %}
 
-        <tbody>
+
         {% for propertyConfig in propertiesFieldConfig %}
             {% if propertyConfig.type == 'groupHeader' %}
                 <tr>

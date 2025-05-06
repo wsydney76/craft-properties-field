@@ -9,6 +9,7 @@ use function array_merge;
 class Settings extends Model
 {
     // Whether to show table header (Property/Value
+    // deprecated
     public bool $showTableHeader = false;
 
     // The date format to use for normalized date outputs

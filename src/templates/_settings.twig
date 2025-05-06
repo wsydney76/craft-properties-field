@@ -1,6 +1,8 @@
 {% import '_includes/forms.twig' as forms %}
 {# @var settings \wsydney76\propertiesfield\models\Settings #}
 
+
+{# Deprecated
 {{ forms.lightswitchField({
     label: 'Show table header'|t('_properties-field'),
     name: 'showTableHeader',
@@ -8,7 +10,7 @@
     onLabel: 'Show header columns (Property/Value)'|t('_properties-field'),
     warning: config.showTableHeader is defined ? _self.configWarning('showTableHeader')
 }) }}
-
+#}
 
 
 {{ forms.selectField({

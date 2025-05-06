@@ -70,6 +70,11 @@ Work in progress. Not tested in a multi-site environment.
 
 ![Field settings](images/field-settings.jpg)
 
+### Custum heading / Custom properties
+
+![Field input](images/field-input3.jpg)
+
+
 ### Use in a matrix block
 
 ![Columns settings](images/column.jpg)
@@ -135,6 +140,8 @@ Just in case: The field can be safely converted to the Craft 5.7 JSON field type
 ### Field settings
 
 Color: The background color of group headers and property labels. Defaults to `no color` (aka gray)
+
+Icon/Heading/Additional heading text: Display a title row with an icon and a heading. Works best if the field name is hidden in the entry type's field layout.
 
 Property types configuration: A list of properties to be displayed in the field. Each property has the following
 settings:
@@ -241,6 +248,39 @@ This will dynamically build options with the entry id as value and the entry tit
   }
 }
 ```
+
+Currently, there is no helper function implemented for querying the table property type, but it can be achieved with raw SQL:
+
+Search for exact value:
+
+```twig
+{% set query = craft.entries.type('propertiesTable')
+    .andWhere("JSON_CONTAINS(
+    JSON_EXTRACT(content, '$.\"7213a17c-6c25-4d0e-9795-cd1adea13db4\".team'),
+    JSON_OBJECT('comment', 'Team lead')
+)")
+%}
+```
+
+Search with wildcards:
+
+```twig
+{% set ids = craft.query
+    .select('elementId')
+    .from("{{%elements_sites}},
+     JSON_TABLE(
+             content->'$.\"7213a17c-6c25-4d0e-9795-cd1adea13db4\".team',
+             '$[*]' COLUMNS (
+                 col_value VARCHAR(255) PATH '$.comment'
+                 )
+     ) AS jt")
+    .where("col_value LIKE '%Team%'")
+    .andWhere("siteId = #{currentSite.id}")
+.column %}
+
+{% set entries = craft.entries.id(ids).all %}
+```
+(Query AI generated...)
 
 ## Dynamic property config
 

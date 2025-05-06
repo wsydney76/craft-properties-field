@@ -32,6 +32,9 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
 
     public array $propertiesFieldConfig = [];
     public string $color = '';
+    public string $icon = '';
+    public string $heading = '';
+    public string $heading2 = '';
     public string $tip = '';
     public string $warning = '';
 
@@ -128,12 +131,33 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
 
         $options = array_merge($settings->propertiesConfig, $settings->extraPropertiesConfig);
         return
+            Cp::iconPickerFieldHtml([
+                'label' => Craft::t('_properties-field', 'Icon'),
+                'name' => 'icon',
+                'value' => $this->icon,
+                'id' => 'icon',
+                'instructions' => Craft::t('_properties-field', 'An icon displayed in a field header.'),
+            ]) .
+            Cp::TextFieldHtml([
+                'label' => Craft::t('_properties-field', 'Heading'),
+                'name' => 'heading',
+                'value' => $this->heading,
+                'id' => 'heading',
+                'instructions' => Craft::t('_properties-field', 'A text displayed in a field header.'),
+                'tip' => Craft::t('_properties-field', 'Works best if the field name is hidden.'),
+            ]) .
+            Cp::TextFieldHtml([
+                'label' => Craft::t('_properties-field', 'Additional heading text'),
+                'name' => 'heading2',
+                'value' => $this->heading2,
+                'id' => 'heading2',
+            ]) .
             Cp::colorSelectFieldHtml([
                 'label' => Craft::t('_properties-field', 'Base Color'),
                 'name' => 'color',
                 'value' => $this->color,
                 'id' => 'color',
-                'instructions' => Craft::t('_properties-field', 'The background color for group headers and property labels.'),
+                'instructions' => Craft::t('_properties-field', 'The background color for headers and property labels.'),
             ]) .
             Cp::editableTableFieldHtml([
                 'label' => Craft::t('_properties-field', 'Properties Configuration'),
