@@ -70,7 +70,7 @@ Work in progress. Not tested in a multi-site environment.
 
 ![Field settings](images/field-settings.jpg)
 
-### Custum heading / Custom properties
+### Custom header / Custom properties
 
 ![Field input](images/field-input3.jpg)
 
@@ -132,7 +132,6 @@ Just in case: The field can be safely converted to the Craft 5.7 JSON field type
 
 ### Plugin settings
 
-* Show header: Whether to show a columns header in the CP. Defaults to `false`
 * Date output format. Defaults to `short`
 * Entries/Assets view mode. Defaults to `cards`
 * Custom input template directory. See Extending section for more details.
@@ -437,7 +436,7 @@ entry.fieldHandle.getNormalized('subfieldHandle') // normalized value
 The standard Craft way of querying for custom field values does not work out of the box, as the field is stored in a
 JSON format with multiple sub-fields, representing not just 'one' value, but 'a set of values'.
 
-As a workaround, the plugin provides a set of query methods that can be used to query for entries/assets with specific
+As a workaround, the plugin provides a set of query methods that can be used to query for entries with specific
 property values.
 
 * Enable the `Enable element query helpers` setting.
@@ -497,7 +496,7 @@ A `propValueSql(fieldIdent, prop [, cast])` method is available in twig that ret
 
 * `propValueSql('propertiesFilm.filmProps', 'seasonEpisode.season')` => `JSON_UNQUOTE(JSON_EXTRACT(content, '$."1cdf8ca4-f462-4ab7-a19a-9a2df1ee1bba".seasonEpisode.season'))`
 * `propValueSql('propertiesFilm.filmProps', 'seasonEpisode.episode', 'SIGNED')` => `CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$."1cdf8ca4-f462-4ab7-a19a-9a2df1ee1bba".seasonEpisode.episode')) AS SIGNED)`
-* `propValueSql('profile', 'seasonEpisode.episode', 'SIGNED')` => `COALESCE(JSON_UNQUOTE(JSON_EXTRACT(content, '$."79e7fc9f-5cff-41c5-bbd3-c5dff87e34f4".name')), JSON_UNQUOTE(JSON_EXTRACT(content, '$."6d9b91f3-ffac-450b-ba63-3a632a1b1dd1".name')))`
+* `propValueSql('profile', 'seasonEpisode.episode')` => `COALESCE(JSON_UNQUOTE(JSON_EXTRACT(content, '$."79e7fc9f-5cff-41c5-bbd3-c5dff87e34f4".name')), JSON_UNQUOTE(JSON_EXTRACT(content, '$."6d9b91f3-ffac-450b-ba63-3a632a1b1dd1".name')))`
 
 Usage example:
 
@@ -698,7 +697,7 @@ Use multiple inputs with sub-keys for each input:
             name: "#{propertyConfig.handle}[comment]",
             value: value['comment'] ?? '',
             placeholder: 'Comment'|t,
-            class: 'text-combined',
+            class: 'text-border',
             first: true
         }) }}
     </div>
@@ -741,7 +740,7 @@ Event::on(
 
 ### Callbacks for custom property types
 
-The config can define callbacks for the `normalize` and `validate` methods.
+The config can define callbacks for the `onNormalize` and `onValidate` methods.
 
 ```php
 <?php
