@@ -17,6 +17,14 @@ class PropertiesFieldHelper
 {
 
 
+    /**
+     * Returns a SQL expression to extract a property value from a JSON field.
+     *
+     * @param string $fieldIdent in the form of 'entryTypeHandle.fieldHandle' or 'fieldHandle'
+     * @param string $prop The handle of the property to check
+     * @param string $cast The SQL type to cast the value to
+     * @return string
+     */
     public static function propValueSql(string $fieldIdent, string $prop, string $cast = ''): string
     {
         $parts = explode('.', $fieldIdent);
@@ -25,6 +33,7 @@ class PropertiesFieldHelper
             $entryTypes = [Craft::$app->entries->getEntryTypeByHandle($parts[0])];
             $fieldHandle = $parts[1];
         } else {
+            // TODO: Can be more efficient?
             $entryTypes = Craft::$app->entries->getAllEntryTypes();
             $fieldHandle = $parts[0];
         }
@@ -44,7 +53,11 @@ class PropertiesFieldHelper
     }
 
 
-
+    /**
+     * @param array $candidates
+     * @param string $fieldHandle
+     * @return array
+     */
     private static function getFieldsFromCandidates(array $candidates, string $fieldHandle): array
     {
         $fields = [];

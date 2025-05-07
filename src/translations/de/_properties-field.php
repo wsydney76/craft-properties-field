@@ -2,12 +2,21 @@
 
 return [
 
+    'A text displayed in a field header, next to the field name.' => 'Ein Text, der in der Kopfzeile eines Feldes angezeigt wird, neben dem Feldnamen.',
+    'A text displayed in a field header.' => 'Ein Text, der in der Kopfzeile eines Feldes angezeigt wird.',
+    'Additional heading text' => 'Zusätzlicher Überschriftentext',
+    'An icon displayed in a field header.' => 'Ein Icon, das in der Kopfzeile eines Feldes angezeigt wird.',
+    'Base Color' => 'Basisfarbe',
     'Cards' => 'Karten',
+    'Changing the handle or type may result in data loss or runtime errors without migrating existing content.' => 'Änderungen des Handles oder Typs können zu Datenverlust oder Laufzeitfehlern führen, wenn vorhandene Inhalte nicht migriert werden.',
     'Custom input template directory' => 'Benutzerdefinierter Templateverzeichnis',
+    'Field Config' => 'Feldkonfig.',
+    'Heading' => 'Überschrift',
     'If custom properties are used, this is the folder inside a projects `template` directory where the input templates live.' => 'Wenn benutzerdefinierte Eigenschaften verwendet werden, ist dies der Ordner innerhalb des `template`-Verzeichnisses eines Projekts, in dem sich die Eingabetemplates befinden.',
     'Instructions' => 'Anweisungen',
     'List' => 'Liste',
     'No' => 'Nein',
+    'Options for select: one option per line, in the format value:label<br>Options for entries/assets: section/volume handles, comma separated' => 'Optionen für Select: eine Option pro Zeile, im Format Wert:Bezeichnung<br>Optionen für Einträge/Assets: Abschnitts-/Volumen-Handles, durch Kommas getrennt',
     'Options' => 'Optionen',
     'Placeholder' => 'Platzhalter',
     'Properties Configuration' => 'Eigenschaften-Konfiguration',
@@ -15,8 +24,11 @@ return [
     'Search' => 'Suche',
     'Show header columns (Property/Value)' => 'Kopfzeilen der Tabelle anzeigen (Eigenschaft/Wert)',
     'Show table header' => 'Tabellenkopf anzeigen',
+    'The background color for headers and property labels.' => 'Die Hintergrundfarbe für Kopfzeilen und Eigenschaftsbezeichnungen.',
+    'This will be shown on every instance of the field and cannot be overwritten.' => 'Dies wird in jeder Instanz des Feldes angezeigt und kann nicht überschrieben werden.',
     'Type' => 'Typ',
     'View Mode for assets sub-fields' => 'Ansichtsmodus für Assets',
     'View Mode for entries sub-fields' => 'Ansichtsmodus für Einträge',
+    'Works best if the field name is hidden.' => 'Funktioniert am besten, wenn der Feldname ausgeblendet ist.',
     'Yes' => 'Ja',
 ];

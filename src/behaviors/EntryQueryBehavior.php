@@ -3,6 +3,7 @@
 namespace wsydney76\propertiesfield\behaviors;
 
 use Craft;
+use craft\base\FieldInterface;
 use craft\elements\db\EntryQuery;
 use wsydney76\propertiesfield\helpers\PropertiesFieldHelper;
 use yii\base\Behavior;
@@ -10,12 +11,20 @@ use yii\db\Expression;
 use function str_replace;
 
 /**
- * Entry Query Behavior behavior
+ * Entry Query behavior
+ *
+ * This behavior is used to add custom query methods to the EntryQuery class.
  *
  * @property EntryQuery $owner
  */
 class EntryQueryBehavior extends Behavior
 {
+    /**
+     * @param string $fieldIdent in the form of 'entryTypeHandle.fieldHandle' or 'fieldHandle'
+     * @param string $prop The handle of the property to check
+     * @param string $value The value to check for
+     * @return EntryQuery
+     */
     public function propEquals(string $fieldIdent, string $prop, string $value): EntryQuery
     {
         $sql = PropertiesFieldHelper::propValueSql($fieldIdent, $prop );
@@ -27,6 +36,14 @@ class EntryQueryBehavior extends Behavior
         return $this->owner;
     }
 
+    /**
+     * Query with LIKE
+     *
+     * @param string $fieldIdent
+     * @param string $prop
+     * @param string $value
+     * @return EntryQuery
+     */
     public function propLike(string $fieldIdent, string $prop, string $value): EntryQuery
     {
         $sql = PropertiesFieldHelper::propValueSql($fieldIdent, $prop);
@@ -36,11 +53,22 @@ class EntryQueryBehavior extends Behavior
         return $this->owner;
     }
 
+
+    /**
+     * Check if a JSON array contains a value
+     * Used for entries/assets property types
+     *
+     * @param string $fieldIdent requires to be in the form of 'entryTypeHandle.fieldHandle'
+     * @param string $prop
+     * @param string $value
+     * @return EntryQuery
+     */
     public function propContains(string $fieldIdent, string $prop, string $value): EntryQuery
     {
         $sql = PropertiesFieldHelper::propValueSql($fieldIdent, $prop);
 
         // Hack
+        // TODO: Fix this
         $sql = str_replace('JSON_UNQUOTE', 'JSON_CONTAINS', $sql);
         $sql = str_replace('))', '), JSON_QUOTE(\'%s\'))', $sql);
         $sql = sprintf($sql, $value);
@@ -51,6 +79,13 @@ class EntryQueryBehavior extends Behavior
         return $this->owner;
     }
 
+    /**
+     * Used for "Boolean with comments" property type, check if a property is on
+     *
+     * @param string $fieldIdent
+     * @param string $prop
+     * @return EntryQuery
+     */
     public function propIsOn(string $fieldIdent, string $prop): EntryQuery
     {
         $sql = PropertiesFieldHelper::propValueSql($fieldIdent, $prop);
@@ -63,11 +98,13 @@ class EntryQueryBehavior extends Behavior
     }
 
     /**
+     * Get field (i.e. the field instance used in a field layout)
+     *
      * @param string $entryTypeHandle
      * @param string $fieldHandle
-     * @return \craft\base\FieldInterface
+     * @return FieldInterface
      */
-    protected function getField(string $entryTypeHandle, string $fieldHandle): \craft\base\FieldInterface
+    protected function getField(string $entryTypeHandle, string $fieldHandle): FieldInterface
     {
         $entryType = Craft::$app->entries->getEntryTypeByHandle($entryTypeHandle);
         if (!$entryType) {

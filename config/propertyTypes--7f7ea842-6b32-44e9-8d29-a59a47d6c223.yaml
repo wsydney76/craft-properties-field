@@ -1,10 +1,10 @@
 columnSuffix: null
-handle: propertiesConfig
+handle: propertyTypes
 instructions: null
-name: 'Properties Config'
+name: 'Custom Property Types'
 searchable: false
 settings:
-  addRowLabel: 'Add a property config'
+  addRowLabel: 'Add a custom property type'
   columns:
     __assoc__:
       -

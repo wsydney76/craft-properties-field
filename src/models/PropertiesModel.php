@@ -64,7 +64,7 @@ class PropertiesModel extends Model
      *  - handle: The handle of the property
      *  - value: The raw value of the property, a default is returned if the property is not in the database
      *  - type: The type of the property
-     *  - normalizedValue: The normalized value of the property, based on the type
+     *  - normalizedValue: The normalized value of the property, based on the type, e.g.
      *    - type = date: The value is formatted as a date string
      *    - type = entry/asset: The value is an Entry/Asset object
      *    - type = entries/assets: The value is an array of Entry/Asset objects
@@ -129,7 +129,6 @@ class PropertiesModel extends Model
     /**
      * Get the normalized value of a property, depending on the type
      *
-     * TODO: Find a better way to handle this, also for custom property types
      *
      * @param $type
      * @param mixed $value
@@ -138,7 +137,7 @@ class PropertiesModel extends Model
      */
     private function getNormalizedValue($config, mixed $value): mixed
     {
-        $callback = $this->settings->getAllPropertiesConfig()[$config['type']]['normalize'] ?? null;
+        $callback = $this->settings->getAllPropertyTypes()[$config['type']]['onNormalize'] ?? null;
 
         if ($callback) {
             return call_user_func($callback, $value, $config);
@@ -176,6 +175,12 @@ class PropertiesModel extends Model
     }
 
 
+    /**
+     * Get entry element (or null)
+     *
+     * @param $value
+     * @return Entry|null
+     */
     public function normalizeEntry($value): ?Entry
     {
         try {
@@ -185,6 +190,12 @@ class PropertiesModel extends Model
         }
     }
 
+    /**
+     * Get array of entry elements (or empty array)
+     *
+     * @param $value
+     * @return mixed
+     */
     public function normalizeEntries($value): mixed
     {
         // This can happen if a default value is set for empty values in getNormalizedProperties()
@@ -195,6 +206,12 @@ class PropertiesModel extends Model
         return $value ? Entry::find()->id($value)->all() : [];
     }
 
+    /**
+     *  Get asset element (or null)
+     *
+     * @param $value
+     * @return Asset|null
+     */
     public function normalizeAsset($value): ?Asset
     {
         try {
@@ -204,6 +221,12 @@ class PropertiesModel extends Model
         }
     }
 
+    /**
+     *  Get array of asset elements (or empty array)
+     *
+     * @param $value
+     * @return mixed
+     */
     public function normalizeAssets($value): mixed
     {
         // This can happen if a default value is set for empty values in getNormalizedProperties()
@@ -214,9 +237,16 @@ class PropertiesModel extends Model
         return $value ? Asset::find()->id($value)->all() : [];
     }
 
+    /**
+     * Return formatted date string
+     *
+     * @param $value
+     * @return string|null
+     * @throws InvalidConfigException
+     */
     public function normalizeDate($value): ?string
     {
-        // Check if $value is a ISO 8601 date string
+        // Check if $value is a ISO 8601 date string (see __construct)
         if (is_string($value)) {
             $date = DateTimeHelper::toDateTime($value);
             if ($date) {
@@ -226,6 +256,13 @@ class PropertiesModel extends Model
         return $value;
     }
 
+    /**
+     * Return SingleOptionFieldData object
+     *
+     * @param $value
+     * @param $config
+     * @return SingleOptionFieldData|mixed
+     */
     public function normalizeSelect($value, $config)
     {
         try {
@@ -257,6 +294,12 @@ class PropertiesModel extends Model
         }
     }
 
+    /**
+     * Return string with Yes/No and optional comment, e.g. "Yes (Beginner)"
+     *
+     * @param $value
+     * @return string
+     */
     public function normalizeExtendedBoolean($value): string
     {
 
@@ -278,6 +321,12 @@ class PropertiesModel extends Model
         return $string;
     }
 
+    /**
+     * Return string with value and unit, e.g. "10 m"
+     *
+     * @param $value
+     * @return string
+     */
     public function normalizeDimension($value): string
     {
         // This can happen if a default value is set for empty values in getNormalizedProperties()
@@ -296,10 +345,21 @@ class PropertiesModel extends Model
         return $string;
     }
 
-    public function getJsonData()
+    /**
+     * Return properties as JsonData object
+     *
+     * @param bool $raw true = return raw JSON data as stored in DB, false = return data matching current prop config
+     * @return JsonData
+     * @throws InvalidConfigException
+     */
+    public function getJsonData(bool $raw = false): JsonData
     {
         if (version_compare(Craft::$app->getVersion(), '5.7.0', '<')) {
             throw new InvalidConfigException('Craft 5.7 or higher is required to use the JSON data type.');
+        }
+
+        if ($raw) {
+            return new JsonData($this->properties);
         }
 
         $props = [];
@@ -311,6 +371,12 @@ class PropertiesModel extends Model
         return new JsonData($props);
     }
 
+    /**
+     * Return properties as JSON string
+     *
+     * @return string
+     * @throws InvalidConfigException
+     */
     public function __toString(): string
     {
         // JsonData returns a string representation of the JSON data

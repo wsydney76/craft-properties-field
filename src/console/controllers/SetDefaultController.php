@@ -9,25 +9,15 @@ use yii\db\Exception;
 use yii\helpers\Console;
 
 /**
- * Change Handle controller
+ * Set default value controller
  */
 class SetDefaultController extends Controller
 {
     public $defaultAction = 'index';
 
-    public function options($actionID): array
-    {
-        $options = parent::options($actionID);
-        switch ($actionID) {
-            case 'index':
-                // $options[] = '...';
-                break;
-        }
-        return $options;
-    }
 
     /**
-     * _properties-field/change-handle command
+     * Set a default value for a property in the database
      */
     public function actionIndex(string $entryTypeHandle, string $fieldTypeHandle, string $handle, string $value): int
     {

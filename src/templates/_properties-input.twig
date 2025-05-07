@@ -3,7 +3,11 @@
 {# @param element Element The currently edited element #}
 {# @param field Field The field type #}
 {# @param settings Settings The plugin settings #}
+{# @param defaultPropertyTypes The built-in property types config #}
 
+
+{# Used CSS classes are stolen from Craft's table field #}
+{# TODO: Use own classes instead of styles #}
 
 {% import '_includes/forms.twig' as forms %}
 
@@ -16,6 +20,8 @@
     <table class="editable fullwidth">
 
         <tbody>
+
+        {# Show a custom header? #}
         {% if field.icon or field.heading or field.heading2 %}
             <tr>
                 <td colspan="2" class="singleline-cell textual"
@@ -55,22 +61,27 @@
                 </tr>
             {% else %}
                 <tr>
+                    {# The property label #}
                     <th class="heading-cell thin"
                         style="background-color: var(--{{ color }}-050); text-align: left; padding: 7px;">
                         {{ propertyConfig.name|t }}
+
+                        {# Instructions #}
                         {% if propertyConfig.instructions ?? null %}
                             <span class="info">
                             {{ propertyConfig.instructions|t }}
                         </span>
                         {% endif %}
+
+                        {# Required? #}
                         {% if propertyConfig.required ?? false %}
                             <span class="required"></span>
                         {% endif %}
                     </th>
 
+                    {# Property inputs using configured template #}
                     <td class="singleline-cell textual">
-
-                        {% set template = settings.extraPropertiesConfig[propertyConfig.type].template ?? settings.propertiesConfig[propertyConfig.type].template %}
+                        {% set template = settings.extraPropertyTypes[propertyConfig.type].template ?? defaultPropertyTypes[propertyConfig.type].template %}
 
                         {{ craft.app.view.renderTemplate(template, {
                             propertyConfig,
@@ -98,8 +109,9 @@
 
 {% endnamespace %}
 
+{# TODO: Namespace classes #}
 {% css %}
-.text-combined {
+.text-border {
     border: 1px solid gray !important;
 }
 

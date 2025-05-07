@@ -15,19 +15,10 @@ class ChangeHandleController extends Controller
 {
     public $defaultAction = 'index';
 
-    public function options($actionID): array
-    {
-        $options = parent::options($actionID);
-        switch ($actionID) {
-            case 'index':
-                // $options[] = '...';
-                break;
-        }
-        return $options;
-    }
 
     /**
-     * _properties-field/change-handle command
+     * Change the handle of a property in the database
+     *
      */
     public function actionIndex(string $entryTypeHandle, string $fieldTypeHandle, string $oldHandle, string $newHandle): int
     {

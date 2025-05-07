@@ -6,7 +6,7 @@
             name: "#{propertyConfig.handle}[quantity]",
             label: 'Quantity',
             type: 'number',
-            class: 'text-combined',
+            class: 'text-border',
             value: value['quantity'] ?? ''
         }) }}
     </div>
@@ -15,7 +15,7 @@
         {{ forms.textField({
             name: "#{propertyConfig.handle}[unit]",
             label: 'Unit',
-            class: 'text-combined text-margin',
+            class: 'text-border text-margin',
             value: value['unit'] ?? '',
             first: true
         }) }}

@@ -10,7 +10,7 @@ This plugin is tested with Craft CMS 5.7, MySql 8.0 and PHP 8.3.
 
 Feature freeze for now.
 
-Tagged 1.0.0-beta.4 as an MVP (minimum viable product) version, and started testing and polishing the plugin in parallel
+Tagged 1.0.0-beta.5 as an MVP (minimum viable product) version, and started testing and polishing the plugin in parallel
 with the development of the project for which it is mainly intended.
 
 Won't make sense to push every minor tweak, so we will share a first final version in a couple of weeks (or months...).
@@ -19,7 +19,7 @@ Won't make sense to push every minor tweak, so we will share a first final versi
 
 Add to `composer.json` file in your project root to require this plugin:
 
-Use version `^1.0.0-beta.3` for 'official' releases, or `dev-main` for the latest development version, where anything
+Use version `^1.0.0-beta.5` for 'official' releases, or `dev-main` for the latest development version, where anything
 can go wrong.
 
 ```json
@@ -95,7 +95,7 @@ The field stores the data posted from the edit form "as-is" in a JSON field (jus
 format).
 
 This means that all values are stored as strings, including numbers and element ids. Lightswitch values are stored as
-`"1"` or `""`.
+`"1"` or `""`, dates are stored in ISO format.
 
 ````json
 {
@@ -159,6 +159,7 @@ settings:
     * Textarea: A multi-line text field
     * Number: A number field
     * Email: An email field
+    * URL: An URL field.
     * Boolean: A boolean field (lightswitch)
     * Select: A select field with options
     * Date: A date field
@@ -186,11 +187,11 @@ settings:
     * `{"offLabel": "labelText","onLabel": "labelText"}` for a boolean field
     * `{"min": 0,"max": 100,"step": 5}` for a number field
 
-  Supported for text/email/number, textarea, boolean, select, date, entries/assets, table property types.
+  Supported for property types with a single input macro.
 
 Tip/Warning: Show a tip/warning. This allows to have consistent settings across all usages. Unlike instructions, tips/warnings added in a field layout do not override the field settings.
 
-### Defaults
+## Defaults
 
 Intentionally, there is no setting for a default value. This is because we want the field to be used in a way that the
 properties are always explicitly set by the editor, rather than relying on a random default value.
@@ -206,7 +207,7 @@ Handles only scalar values for now.
 
 For recurring workflows, like adding a new 'skill', you may think of a utility that allows to bulk update the property for all relevant entries at once.
 
-### Table property type
+## Table property type
 
 Experimental, work in progress.
 
@@ -308,24 +309,6 @@ Experimental approach:
   holds the property set.
 * This will load the configs from the entry and insert them at that position.
 
-## Limitations
-
-* Only supports a limited set of field types
-* Does not support all possible field settings
-* Craft is not aware of sub-fields, so the whole field is marked as updated on changes. 
-* A translation method can only be used for the whole field, not for sub-fields.
-* No out-of-the-box validation for sub-fields, validation errors cannot be attached to a sub-field.
-* No fancy UI for extended sub-field settings.
-* Does not support conditional logic for sub-fields.
-* Eager loading of elements is not supported.
-* Does not support standard Craft queries for custom fields.
-* Does not support element-index columns.
-
-Regarding translations:
-
-* Supports `Copy value from other site` for the whole field.
-* Idea: if the field is translatable, making single sub-fields 'not translatable' could be achieved by syncing the values via hooking into save events.
-  See experimental event handler at the end of this doc.
 
 ## Templating
 
@@ -449,7 +432,7 @@ entry.fieldHandle.get('subfieldHandle') // raw value
 entry.fieldHandle.getNormalized('subfieldHandle') // normalized value
 ```
 
-### Querying
+## Querying
 
 The standard Craft way of querying for custom field values does not work out of the box, as the field is stored in a
 JSON format with multiple sub-fields, representing not just 'one' value, but 'a set of values'.
@@ -460,7 +443,7 @@ property values.
 * Enable the `Enable element query helpers` setting.
 * A properties field can be accessed in the form `entryTypeHandle.fieldHandle` or `fieldHandle` if the field is used in multiple entry types.
 
-#### Query methods
+### Query methods
 
 The following query methods are available via a behavior:
 
@@ -506,7 +489,7 @@ The following query methods are available via a behavior:
 
 ```
 
-#### Advanced queries
+### Advanced queries
 
 Experimental, work in progress.
 
@@ -531,7 +514,7 @@ Usage example:
 
 You may need to use the `expression()` function to avoid incorrect escaping.
 
-#### Preparse fields
+### Preparse fields
 
 If you want to execute more advanced queries on a sub-field, the [Preparse plugin](https://github.com/jalendport/craft-preparse) can be used.
 
@@ -546,7 +529,7 @@ Now the sub-field can be queried like a normal field:
 %}
 ```
 
-#### Hardcoded SQL
+### Hardcoded SQL
 
 The UID under which the data of a properties field is stored in Craft's content column is part of the project config, so it does not change between environments.
 
@@ -560,7 +543,7 @@ So it feels safe to hard code the SQL statements, if you prefer that.
 
 Look in `/config/project/entrytypes/yourEntryType-....yaml` for `fieldlayouts > [fieldLayoutUid] > tabs > elements > yourField > uid`
 
-### Relations
+## Relations
 
 The `Entry/Entries/Asset/Assets` sub-field types establish a relation, that can be queried via the `relatedTo` query
 param
@@ -578,11 +561,11 @@ Craft only supports this for fields extending `BaseRelationField`.
 
 Use `propContains()` instead.
 
-### GraphQL
+## GraphQL
 
 Like Craft's native [JSON fields](https://craftcms.com/docs/5.x/reference/field-types/json.html#graphql), Property fields are treated like plain strings, when queried via GraphQL. Values must be deserialized in the client or app.
 
-### Examples: Handling "Boolean with comment" property type
+## Examples: Handling "Boolean with comment" property type
 
 See screenshot of the 'Skills' example above
 
@@ -671,20 +654,20 @@ use modules\main\properties\MyPropertiesModel;
 
 return [
     'customInputTemplateDir' => '_properties-field-inputs',
-    'extraPropertiesConfig' => [
+    'extraPropertyTypes' => [
         'demo' => [
             'label' => 'Demo',
             'type' => 'demo',
             'template' => '_properties-field-inputs/demo.twig',
-            'normalize' => [MyPropertiesModel::class, 'normalizeDemo'], // Optional, see callbacks section below
-            'validate' => [[MyPropertiesModel::class, 'validateDemo']], // Optional, see callbacks section below
+            'onNormalize' => [MyPropertiesModel::class, 'normalizeDemo'], // Optional, see callbacks section below
+            'onValidate' => [[MyPropertiesModel::class, 'validateDemo']], // Optional, see callbacks section below
         ]
     ],
 ];
 
 ```
 
-### Templating custom property types
+### Templating custom property types input
 
 Define twig templates inside the folder specified by `customInputTemplateDir` in the plugin settings.
 
@@ -810,6 +793,26 @@ SET content = JSON_REMOVE(
               )
 WHERE JSON_CONTAINS_PATH(content, 'one', '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8"."oldHandle"');
 ```
+
+## Limitations
+
+* Only supports a limited set of field types
+* Does not support all possible field settings
+* Craft is not aware of sub-fields, so the whole field is marked as updated on changes.
+* A translation method can only be used for the whole field, not for sub-fields.
+* No out-of-the-box validation for sub-fields, validation errors cannot be attached to a sub-field.
+* No fancy UI for extended sub-field settings.
+* Does not support conditional logic for sub-fields.
+* Eager loading of elements is not supported.
+* Does not support standard Craft queries for custom fields.
+* Does not support element-index columns.
+* Not tested with Postgres database.
+
+Regarding translated content:
+
+* Supports `Copy value from other site` for the whole field.
+* Idea: if the field is translatable, making single sub-fields 'not translatable' could be achieved by syncing the values via hooking into save events.
+  See experimental event handler below.
 
 ## Event handlers
 
