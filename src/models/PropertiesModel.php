@@ -46,7 +46,7 @@ class PropertiesModel extends Model
         $this->settings = PropertiesFieldPlugin::getInstance()->getSettings();
 
         foreach ($config['propertiesFieldConfig'] as $propertyConfig) {
-            if ($propertyConfig['type'] === 'date' && isset($config['properties'][$propertyConfig['handle']])) {
+            if (in_array($propertyConfig['type'], ['date', 'datetime'], true) && isset($config['properties'][$propertyConfig['handle']])) {
                 $config['properties'][$propertyConfig['handle']] =
                     DateTimeHelper::toIso8601($config['properties'][$propertyConfig['handle']]);
             }
@@ -246,14 +246,39 @@ class PropertiesModel extends Model
      */
     public function normalizeDate($value): ?string
     {
+
+        $format = PropertiesFieldPlugin::getInstance()->getSettings()->dateFormat;
         // Check if $value is a ISO 8601 date string (see __construct)
         if (is_string($value)) {
             $date = DateTimeHelper::toDateTime($value);
             if ($date) {
-                return Craft::$app->getFormatter()->asDate($date, PropertiesFieldPlugin::getInstance()->getSettings()->dateFormat);
+                return Craft::$app->getFormatter()->asDate($date, $format);
             }
         }
-        return $value;
+        $date = DateTimeHelper::toDateTime($value);
+        return Craft::$app->getFormatter()->asDate($date, $format);
+    }
+
+    /**
+     * Return formatted date string
+     *
+     * @param $value
+     * @return string|null
+     * @throws InvalidConfigException
+     */
+    public function normalizeDateTime($value): ?string
+    {
+
+        $format = PropertiesFieldPlugin::getInstance()->getSettings()->dateFormat;
+        // Check if $value is a ISO 8601 date string (see __construct)
+        if (is_string($value)) {
+            $date = DateTimeHelper::toDateTime($value);
+            if ($date) {
+                return Craft::$app->getFormatter()->asDatetime($date, $format);
+            }
+        }
+        $date = DateTimeHelper::toDateTime($value);
+        return Craft::$app->getFormatter()->asDatetime($date, $format);
     }
 
     /**

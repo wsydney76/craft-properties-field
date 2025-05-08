@@ -1,8 +1,10 @@
 {% import '_includes/forms.twig' as forms %}
+
 <div style="max-width: 300px;">
-    {{ forms.date({
+    {{ forms.dateTimeField({
         name: propertyConfig.handle,
         type: propertyConfig.type,
+        minuteIncrement: 15,
         value: value ?? ''
     }|merge(propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {})) }}
 </div>

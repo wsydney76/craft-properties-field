@@ -60,6 +60,13 @@ class Config
             'onNormalize' => [PropertiesModel::class, 'normalizeDate'],
             'onValidate' => [[Properties::class, 'validateRequired']],
         ],
+        'datetime' => [
+            'label' => 'Date Time',
+            'type' => 'datetime',
+            'template' => '_properties-field/_inputs/datetime.twig',
+            'onNormalize' => [PropertiesModel::class, 'normalizeDateTime'],
+            'onValidate' => [[Properties::class, 'validateRequired']],
+        ],
         'select' => [
             'label' => 'Select',
             'type' => 'select',
