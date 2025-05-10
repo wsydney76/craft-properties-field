@@ -208,11 +208,12 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
                 'errors' => $this->getErrors('propertiesFieldConfig'),
                 'data' => ['error-key' => 'options'],
             ]) .
-            Cp::textFieldHtml([
+            Cp::autosuggestFieldHtml([
                 'label' => Craft::t('_properties-field', 'Preview Template'),
                 'name' => 'previewTemplate',
                 'value' => $this->previewTemplate,
                 'id' => 'previewTemplate',
+                'suggestTemplates' => true,
                 'instructions' => Craft::t('_properties-field', 'The template that renders the preview in element indexes and cards.'),
             ]) .
             Cp::textareaFieldHtml([
