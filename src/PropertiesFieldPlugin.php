@@ -58,13 +58,13 @@ class PropertiesFieldPlugin extends Plugin
 
             }
 
-            if ($this->settings->customInputTemplateDir) {
+            if ($this->settings->customTemplateDir) {
 
                 Event::on(
                     View::class,
                     View::EVENT_REGISTER_CP_TEMPLATE_ROOTS,
                     function(RegisterTemplateRootsEvent $event) {
-                        $dir = $this->settings->customInputTemplateDir;
+                        $dir = $this->settings->customTemplateDir;
                         $event->roots[$dir] = Craft::getAlias('@templates') . '/' . $dir;
                     }
                 );

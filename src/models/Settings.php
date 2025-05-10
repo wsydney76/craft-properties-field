@@ -23,7 +23,7 @@ class Settings extends Model
     public bool $enableElementQueryHelpers = false;
 
     // Where to find input templates for custom property types
-    public string $customInputTemplateDir = '';
+    public string $customTemplateDir = '';
 
     // Custom property types as defined in config/_properties-field.php
     public array $extraPropertyTypes = [];

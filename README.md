@@ -134,7 +134,8 @@ Just in case: The field can be safely converted to the Craft 5.7 JSON field type
 
 * Date output format. Defaults to `short`
 * Entries/Assets view mode. Defaults to `cards`
-* Custom input template directory. See Extending section for more details.
+* Custom template directory. Registers a template root in the `cp` template mode, that can be used for custom property
+  types inputs or previews. You can leave this blank if your project registers its own template root.
 
 ### Field settings
 
@@ -162,6 +163,7 @@ settings:
     * Boolean: A boolean field (lightswitch)
     * Select: A select field with options
     * Date: A date field
+    * DateTime: A date/time field
     * Entry/Entries: An entries field with one or multiple entries
     * Entry Select: A select field with one entry. Allows to select an entry without opening the selection modal.
     * Asset/Assets: An assets field with one or multiple assets
@@ -187,6 +189,8 @@ settings:
     * `{"min": 0,"max": 100,"step": 5}` for a number field
 
   Supported for property types with a single input macro.
+
+Preview template: A twig template that is used to render the preview of the property. This is used for a element index columns and cards. See preview section below.
 
 Tip/Warning: Show a tip/warning. This allows to have consistent settings across all usages. Unlike instructions, tips/warnings added in a field layout do not override the field settings.
 
@@ -431,6 +435,32 @@ entry.fieldHandle.get('subfieldHandle') // raw value
 entry.fieldHandle.getNormalized('subfieldHandle') // normalized value
 ```
 
+## Preview
+
+A preview template for a field can be defined in the field settings. This is used for element index columns and cards.
+
+![Card](images/card.jpg)
+
+The template receives the following variables:
+* `element`: The element object
+* `value`: The field value
+
+Value will be an instance of `PropertiesModel` (index column or card) or `null` (field layout card designer).
+
+Example:
+
+```twig
+{% if value %}
+    {{ value.get('name') }}, {{ value.get('available') ? 'available'|t : 'unavailable'|t }}
+   <br>
+    {{ value.get('bio') }}
+{% else %}
+    Sabine Mustermann, available<br>
+    short bio...
+{% endif %}
+```
+
+
 ## Querying
 
 The standard Craft way of querying for custom field values does not work out of the box, as the field is stored in a
@@ -652,7 +682,7 @@ Examples:
 use modules\main\properties\MyPropertiesModel;
 
 return [
-    'customInputTemplateDir' => '_properties-field-inputs',
+    'customTemplateDir' => '_properties-field-inputs',
     'extraPropertyTypes' => [
         'demo' => [
             'label' => 'Demo',
@@ -668,7 +698,7 @@ return [
 
 ### Templating custom property types input
 
-Define twig templates inside the folder specified by `customInputTemplateDir` in the plugin settings.
+Define twig templates inside the folder specified by `customTemplateDir` in the plugin settings.
 
 The templates receive the following variables:
 
@@ -804,7 +834,6 @@ WHERE JSON_CONTAINS_PATH(content, 'one', '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b
 * Does not support conditional logic for sub-fields.
 * Eager loading of elements is not supported.
 * Does not support standard Craft queries for custom fields.
-* Does not support element-index columns.
 * Not tested with Postgres database.
 
 Regarding translated content:

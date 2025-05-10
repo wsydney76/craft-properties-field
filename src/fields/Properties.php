@@ -6,6 +6,7 @@ use Craft;
 use craft\base\CrossSiteCopyableFieldInterface;
 use craft\base\ElementInterface;
 use craft\base\Field;
+use craft\base\PreviewableFieldInterface;
 use craft\base\RelationalFieldInterface;
 use craft\elements\Entry;
 use craft\errors\InvalidFieldException;
@@ -17,14 +18,15 @@ use wsydney76\propertiesfield\events\DefineSearchKeywordsEvent;
 use wsydney76\propertiesfield\models\Config;
 use wsydney76\propertiesfield\models\PropertiesModel;
 use wsydney76\propertiesfield\PropertiesFieldPlugin;
-use yii\db\ExpressionInterface;
 use yii\db\Schema;
 
 /**
  * Properties field type
  */
-class Properties extends Field implements RelationalFieldInterface, CrossSiteCopyableFieldInterface
+class Properties extends Field implements RelationalFieldInterface, CrossSiteCopyableFieldInterface, PreviewableFieldInterface
 {
+
+
     public const string EVENT_DEFINE_SEARCH_KEYWORDS = 'defineSearchKeywords';
 
     // The properties selected for this field
@@ -41,6 +43,9 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
     public string $tip = '';
     // The text to display as warning below the field
     public string $warning = '';
+
+    // The template that renders the preview in element indexes and cards
+    public string $previewTemplate = '';
 
     /**
      * @inheritDoc
@@ -203,6 +208,13 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
                 'errors' => $this->getErrors('propertiesFieldConfig'),
                 'data' => ['error-key' => 'options'],
             ]) .
+            Cp::textFieldHtml([
+                'label' => Craft::t('_properties-field', 'Preview Template'),
+                'name' => 'previewTemplate',
+                'value' => $this->previewTemplate,
+                'id' => 'previewTemplate',
+                'instructions' => Craft::t('_properties-field', 'The template that renders the preview in element indexes and cards.'),
+            ]) .
             Cp::textareaFieldHtml([
                 'label' => Craft::t('_properties-field', 'Tip'),
                 'name' => 'tip',
@@ -211,7 +223,7 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
                 'class' => 'nicetext',
                 'rows' => 1,
                 'warning' => Craft::t('_properties-field', 'This will be shown on every instance of the field and cannot be overwritten.')
-            ]).
+            ]) .
             Cp::textareaFieldHtml([
                 'label' => Craft::t('_properties-field', 'Warning'),
                 'name' => 'warning',
@@ -613,5 +625,23 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
         }
 
         return $ids;
+    }
+
+    public function getPreviewHtml(mixed $value, ElementInterface $element): string
+    {
+        $template = $this->previewTemplate;
+        if ($template) {
+            return Craft::$app->getView()->renderTemplate($template, [
+                'value' => $value,
+                'element' => $element,
+            ], 'cp');
+        }
+        // Hint: Don't add fields without a preview template to element index columns or cards
+        return Craft::t('_properties-field', 'No preview available.');
+    }
+
+    public function previewPlaceholderHtml(mixed $value, ?ElementInterface $element): string
+    {
+        return $this->getPreviewHtml($value, $element ?? new Entry());
     }
 }

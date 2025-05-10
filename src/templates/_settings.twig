@@ -36,11 +36,12 @@
 }) }}
 
 {{ forms.textField({
-    label: 'Custom input template directory'|t('_properties-field'),
-    name: 'customInputTemplateDir',
-    value: settings.customInputTemplateDir,
-    instructions: 'If custom properties are used, this is the folder inside a projects `template` directory where the input templates live.'|t('_properties-field'),
-    warning: config.customInputTemplateDir is defined ? _self.configWarning('customInputTemplateDir')
+    label: 'Custom template directory'|t('_properties-field'),
+    name: 'customTemplateDir',
+    value: settings.customTemplateDir,
+    instructions: 'If custom properties or previews are used, this is the folder inside a projects `template` directory where the templates live.'|t('_properties-field'),
+    tip: 'This directory will be registered as a template root in the `cp` template mode. You can leave this blank if your project registers its own template root.'|t('_properties-field'),
+    warning: config.customTemplateDir is defined ? _self.configWarning('customTemplateDir')
 }) }}
 
 
