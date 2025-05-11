@@ -87,6 +87,10 @@ Work in progress. Not tested in a multi-site environment.
 This kind of setup is actually one of the main use cases for this plugin, as it allows to add/remove/rearrange
 properties consistently without creating a myriad of fields/matrix blocks.
 
+If enable in the field settings, newly added properties that are missing in the database are marked by a red border, so that the editor can easily spot them.
+
+![Marker](images/missing-marker.jpg)
+
 See the [Templating](#templating) section for more details on how to output/search this in your templates.
 
 ## Storage
@@ -189,6 +193,9 @@ settings:
     * `{"min": 0,"max": 100,"step": 5}` for a number field
 
   Supported for property types with a single input macro.
+
+Enable missing property marker: If enabled, a red border is displayed around properties that are missing in the database. This is useful for
+  editors to spot properties that need to be set.
 
 Preview template: A twig template that is used to render the preview of the property. This is used for a element index columns and cards. See preview section below.
 

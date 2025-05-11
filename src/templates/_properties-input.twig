@@ -80,7 +80,11 @@
                     </th>
 
                     {# Property inputs using configured template #}
-                    <td class="singleline-cell textual">
+                    <td class="singleline-cell textual"
+                        {% if field.enableMissingMarkers %}
+                            style="border-left:4px solid {{ properties[propertyConfig.handle] is not defined ? 'var(--red-700)' : 'transparent' }}"
+                        {% endif %}
+                    >
                         {% set template = settings.extraPropertyTypes[propertyConfig.type].template ?? defaultPropertyTypes[propertyConfig.type].template %}
 
                         {{ craft.app.view.renderTemplate(template, {

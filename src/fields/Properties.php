@@ -47,6 +47,9 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
     // The template that renders the preview in element indexes and cards
     public string $previewTemplate = '';
 
+    // Whether properties missing in the database should receive a marker
+    public bool $enableMissingMarkers = true;
+
     /**
      * @inheritDoc
      */
@@ -207,6 +210,12 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
                 'rows' => $this->propertiesFieldConfig,
                 'errors' => $this->getErrors('propertiesFieldConfig'),
                 'data' => ['error-key' => 'options'],
+            ]) .
+            Cp::lightswitchFieldHtml([
+                'label' => Craft::t('_properties-field', 'Enable missing properties markers'),
+                'name' => 'enableMissingMarkers',
+                'on' => $this->enableMissingMarkers,
+                'onLabel' => Craft::t('_properties-field', 'Show markers on edit forms for properties missing in the database'),
             ]) .
             Cp::autosuggestFieldHtml([
                 'label' => Craft::t('_properties-field', 'Preview Template'),
