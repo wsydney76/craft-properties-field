@@ -87,7 +87,7 @@ Work in progress. Not tested in a multi-site environment.
 This kind of setup is actually one of the main use cases for this plugin, as it allows to add/remove/rearrange
 properties consistently without creating a myriad of fields/matrix blocks.
 
-If enable in the field settings, newly added properties that are missing in the database are marked by a red border, so that the editor can easily spot them.
+If enabled in the field settings, newly added properties that are missing in the database are marked by a red border, so that the editor can easily spot them.
 
 ![Marker](images/missing-marker.jpg)
 
