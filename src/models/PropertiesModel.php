@@ -8,9 +8,12 @@ use craft\base\Model;
 use craft\elements\Asset;
 use craft\elements\Entry;
 use craft\fields\data\JsonData;
+use craft\fields\data\MultiOptionsFieldData;
+use craft\fields\data\OptionData;
 use craft\fields\data\SingleOptionFieldData;
 use craft\helpers\DateTimeHelper;
 use Exception;
+use Illuminate\Support\Collection;
 use wsydney76\propertiesfield\fields\Properties;
 use wsydney76\propertiesfield\PropertiesFieldPlugin;
 use yii\base\InvalidConfigException;
@@ -203,7 +206,7 @@ class PropertiesModel extends Model
             return $value;
         }
 
-        return $value ? Entry::find()->id($value)->all() : [];
+        return $value ? Entry::find()->id($value)->collect() : Collection::make([]);
     }
 
     /**
@@ -234,7 +237,7 @@ class PropertiesModel extends Model
             return $value;
         }
 
-        return $value ? Asset::find()->id($value)->all() : [];
+        return $value ? Asset::find()->id($value)->collect() : Collection::make([]);
     }
 
     /**
@@ -311,6 +314,57 @@ class PropertiesModel extends Model
 
             $value = new SingleOptionFieldData($selectedOption ? $selectedOption['label'] : '', $value, !empty($selectedOption), true);
             $value->setOptions($options);
+            return $value;
+        } catch (Exception $e) {
+
+            Craft::error($e->getMessage(), __METHOD__);
+            return $value;
+        }
+    }
+
+    public function normalizeMultiSelect($value, $config)
+    {
+        try {
+            if ($value === null || $value === '') {
+                $value = [];
+            }
+
+            // TODO: This is the same logic as in _inputs/select.twig, unify this
+            $options = array_map(function($option) {
+                $parts = explode(':', $option, 2);
+                return [
+                    'value' => $parts[0],
+                    'label' => count($parts) === 2 ? $parts[1] : $parts[0],
+                ];
+            }, explode("\n", str_replace("\r", '', $config['options'])));
+
+
+            // Copied from BaseOptionsField::normalizeValue()
+            // TODO: Any chance to reuse this code?
+            $selectedBlankOption = false;
+            $optionValues = [];
+            $optionLabels = [];
+            $optionData = [];
+
+            foreach ($options as $option) {
+                    $selected = $this->isOptionSelected($option, $value, $value, $selectedBlankOption);
+                    $optionData[] = new OptionData($option['label'], $option['value'], $selected, true);
+                    $optionValues[] = (string)$option['value'];
+                    $optionLabels[] = (string)$option['label'];
+            }
+
+            $selectedOptions = [];
+
+            foreach ($value as $selectedValue) {
+                $index = array_search($selectedValue, $optionValues, true);
+                $valid = $index !== false;
+                $label = $valid ? $optionLabels[$index] : null;
+                $selectedOptions[] = new OptionData($label, $selectedValue, true, $valid);
+            }
+
+            $value = new MultiOptionsFieldData($selectedOptions);
+            $value->setOptions($optionData);
+
             return $value;
         } catch (Exception $e) {
 
@@ -406,6 +460,11 @@ class PropertiesModel extends Model
     {
         // JsonData returns a string representation of the JSON data
         return (string)$this->getJsonData();
+    }
+
+    protected function isOptionSelected(array $option, mixed $value, array &$selectedValues, bool &$selectedBlankOption): bool
+    {
+        return in_array($option['value'], $selectedValues, true);
     }
 
 }

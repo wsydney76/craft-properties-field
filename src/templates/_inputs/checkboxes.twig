@@ -1,0 +1,39 @@
+{% import '_includes/forms.twig' as forms %}
+
+{% set ui = ui ?? 'checkboxes' %}
+
+{% set options = propertyConfig.options|replace('\r','')|split('\n')|map(option => option|split(':', 2)) %}
+
+{% set options = options|map(option => {
+    value: option[0],
+    label: option|length == 2 ? option [1] : option[0]
+}) %}
+
+
+
+<div style="padding: 8px;">
+    {% switch ui %}
+
+    {% case "multiselect" %}
+
+        {{ forms.selectize({
+            name: propertyConfig.handle,
+            values: value ?? '',
+            options: options,
+            multi: true
+        }|merge(propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {})) }}
+
+    {% default %}
+
+        {% set attr = {
+            name: propertyConfig.handle,
+            values: value ?? '',
+            options: options,
+        }|merge(propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {}) %}
+
+        {% include '_includes/forms/checkboxGroup.twig' with attr only %}
+
+    {% endswitch %}
+
+
+</div>

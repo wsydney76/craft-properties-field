@@ -166,11 +166,14 @@ settings:
     * URL: An URL field.
     * Boolean: A boolean field (lightswitch)
     * Select: A select field with options
+    * Radio: A radio field with options
+    * Checkboxes: A checkbox field with options
+    * Multiselect: A multi-select field with options
     * Date: A date field
     * DateTime: A date/time field
-    * Entry/Entries: An entries field with one or multiple entries
-    * Entry Select: A select field with one entry. Allows to select an entry without opening the selection modal.
-    * Asset/Assets: An assets field with one or multiple assets
+    * Entry/Entries: An entries field with one entry or multiple entries
+    * Entry Select/Entries Select: A select field with one entry or multiple entries. Allows to select an entry without opening the selection modal.
+    * Asset/Assets: An assets field with one asset or multiple assets
     * Boolean with comment: A boolean field combined with a comment field (experimental)
     * Table: A table field with configurable columns, incl. entry selection (experimental). See the Table property type
       section below.
@@ -190,7 +193,7 @@ settings:
   supported by the field type. For example:
     * `{"placeholder": "placeholder text"}` for a text field
     * `{"offLabel": "labelText","onLabel": "labelText"}` for a boolean field
-    * `{"min": 0,"max": 100,"step": 5}` for a number field
+    * `{"min": 0,"max": 100,"step": 5, "suffix": "cm"}` for a number field
 
   Supported for property types with a single input macro.
 
@@ -417,11 +420,13 @@ Each property is an array with the following keys:
 * `type`: The type of the property
 * `value`: The raw value of the property
 * `normalizedValue`: The normalized value of the property, depending on the type:
-    * `date`: A formated date string
-    * `entry/asset`: A single element (or null)
-    * `entries/assets`: An array of elements (or empty array)
-    * `select`: An instance of `craft\fields\data\SingleOptionFieldData`. See Craft CMS documentation of the Dropdown
+    * `date/datetime`: A formated date string
+    * `entry/asset/entrySelect`: A single element (or null)
+    * `entries/assets/entriesSelect`: An array of elements (or empty array)
+    * `select/radio`: An instance of `craft\fields\data\SingleOptionFieldData`. See Craft CMS documentation of the Dropdown
       field for more details.
+    * `checkboxes/multiselect`: An instance of `craft\fields\data\MultiOptionsFieldData`. See Craft CMS documentation of the Multiselect
+        field for more details
     * `boolean with comment`: A string with (translated) Yes/No, and a comment string, e.g. `Yes (Expert level)`
     * `other`: The raw value
 

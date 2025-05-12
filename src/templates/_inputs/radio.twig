@@ -1,0 +1,22 @@
+{% import '_includes/forms.twig' as forms %}
+
+{% set options = propertyConfig.options|replace('\r','')|split('\n')|map(option => option|split(':', 2)) %}
+
+{% set options = options|map(option => {
+    value: option[0],
+    label: option|length == 2 ? option [1] : option[0]
+}) %}
+
+{% if not propertyConfig.required %}
+    {% set options = options|unshift({value: '', label: '-'}) %}
+{% endif %}
+
+{% set attr = {
+    name: propertyConfig.handle,
+    value: value ?? '',
+    options: options,
+}|merge(propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {}) %}
+
+<div style="padding: 8px;">
+    {% include '_includes/forms/radioGroup.twig' with attr only %}
+</div>
