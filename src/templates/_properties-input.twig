@@ -17,7 +17,7 @@
 {% endif %}
 
 {% namespace field.handle %}
-    <table class="editable fullwidth">
+    <table class="editable fullwidth properties-field">
 
         <tbody>
 
@@ -90,7 +90,8 @@
                         {{ craft.app.view.renderTemplate(template, {
                             propertyConfig,
                             value: properties[propertyConfig.handle] ?? null,
-                            settings
+                            settings,
+                            element
                         }, 'cp')|raw }}
 
                     </td>

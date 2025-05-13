@@ -2,6 +2,7 @@
 
 namespace wsydney76\propertiesfield\models;
 
+use CommerceGuys\Addressing\Country\Country;
 use Craft;
 use craft\base\ElementInterface;
 use craft\base\Model;
@@ -11,6 +12,7 @@ use craft\fields\data\JsonData;
 use craft\fields\data\MultiOptionsFieldData;
 use craft\fields\data\OptionData;
 use craft\fields\data\SingleOptionFieldData;
+use craft\fields\Money;
 use craft\helpers\DateTimeHelper;
 use Exception;
 use Illuminate\Support\Collection;
@@ -18,6 +20,7 @@ use wsydney76\propertiesfield\fields\Properties;
 use wsydney76\propertiesfield\PropertiesFieldPlugin;
 use yii\base\InvalidConfigException;
 use function is_string;
+use function json_decode;
 use function reset;
 
 /**
@@ -241,6 +244,50 @@ class PropertiesModel extends Model
     }
 
     /**
+     *  Get country model
+     *
+     * @param $value
+     * @return ?Country
+     */
+    public function normalizeCountry($value): ?Country
+    {
+        // This can happen if a default value is set for empty values in getNormalizedProperties()
+        if (!$value) {
+            return null;
+        }
+
+        return Craft::$app->getAddresses()->getCountryRepository()->get($value, Craft::$app->language);
+    }
+
+    /**
+     *  Get money
+     *
+     * @param $value
+     * @return ?Country
+     */
+    public function normalizeMoney($value, $config): ?\Money\Money
+    {
+        $currency = PropertiesFieldPlugin::getInstance()->getSettings()->currency;
+
+        if ($config['fieldConfig']) {
+            $fieldConfig = json_decode($config['fieldConfig']);
+            if (isset($fieldConfig->currency)) {
+                $currency = $fieldConfig->currency;
+            }
+        }
+
+        if (!$value) {
+            return null;
+        }
+
+        $field = new Money([
+            'currency' => $currency,
+        ]);
+
+        return $field->normalizeValue($value, new Entry());
+    }
+
+    /**
      * Return formatted date string
      *
      * @param $value
@@ -272,7 +319,7 @@ class PropertiesModel extends Model
     public function normalizeDateTime($value): ?string
     {
 
-        $format = PropertiesFieldPlugin::getInstance()->getSettings()->dateFormat;
+        $format = PropertiesFieldPlugin::getInstance()->getSettings()->dateTimeFormat;
         // Check if $value is a ISO 8601 date string (see __construct)
         if (is_string($value)) {
             $date = DateTimeHelper::toDateTime($value);

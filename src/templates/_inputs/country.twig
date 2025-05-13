@@ -1,0 +1,15 @@
+{% import '_includes/forms.twig' as forms %}
+
+{% set options = craft.app.addresses.getCountryList(craft.app.language) %}
+
+{% if not propertyConfig.required %}
+    {% set options = options|unshift({value: '', label: '-'}) %}
+{% endif %}
+
+<div class="" style="padding: 8px;">
+    {{ forms.selectize({
+        name: propertyConfig.handle,
+        value: value ?? '',
+        options: options,
+    }|merge(propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {})) }}
+</div>

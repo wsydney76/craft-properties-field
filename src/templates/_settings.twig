@@ -36,6 +36,33 @@
 }) }}
 
 {{ forms.textField({
+    label: 'Date Format'|t('_properties-field'),
+    name: 'dateFormat',
+    size: 8,
+    value: settings.dateFormat,
+    instructions: 'The output format for date fields'|t('_properties-field'),
+    warning: config.dateFormat is defined ? _self.configWarning('dateFormat')
+}) }}
+
+{{ forms.textField({
+    label: 'Date Time Format'|t('_properties-field'),
+    name: 'dateTimeFormat',
+    size: 8,
+    value: settings.dateTimeFormat,
+    instructions: 'The output format for date time fields'|t('_properties-field'),
+    warning: config.dateTimeFormat is defined ? _self.configWarning('dateTimeFormat')
+}) }}
+
+{{ forms.textField({
+    label: 'Currency'|t('_properties-field'),
+    name: 'currency',
+    size: 8,
+    value: settings.currency,
+    instructions: 'The currency used for money fields'|t('_properties-field'),
+    warning: config.currency is defined ? _self.configWarning('currency')
+}) }}
+
+{{ forms.textField({
     label: 'Custom template directory'|t('_properties-field'),
     name: 'customTemplateDir',
     value: settings.customTemplateDir,

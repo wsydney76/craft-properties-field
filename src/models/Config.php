@@ -30,6 +30,25 @@ class Config
                 [Properties::class, 'validateNumber'],
             ],
         ],
+        'range' => [
+            'label' => 'Range',
+            'type' => 'range',
+            'template' => '_properties-field/_inputs/range.twig',
+            'onValidate' => [
+                [Properties::class, 'validateRequired'],
+                [Properties::class, 'validateNumber'],
+            ],
+        ],
+        'money' => [
+            'label' => 'Money',
+            'type' => 'money',
+            'template' => '_properties-field/_inputs/money.twig',
+            'onNormalize' => [PropertiesModel::class, 'normalizeMoney'],
+            'onValidate' => [
+                [Properties::class, 'validateRequired'],
+                // [Properties::class, 'validateMoney'],
+            ],
+        ],
         'email' => [
             'label' => 'Email',
             'type' => 'email',
@@ -128,6 +147,13 @@ class Config
             'type' => 'asset',
             'template' => '_properties-field/_inputs/elementSelect.twig',
             'onNormalize' => [PropertiesModel::class, 'normalizeAsset'],
+            'onValidate' => [[Properties::class, 'validateRequired']],
+        ],
+        'country' => [
+            'label' => 'Country',
+            'type' => 'country',
+            'template' => '_properties-field/_inputs/country.twig',
+            'onNormalize' => [PropertiesModel::class, 'normalizeCountry'],
             'onValidate' => [[Properties::class, 'validateRequired']],
         ],
         'assets' => [

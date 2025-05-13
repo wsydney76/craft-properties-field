@@ -15,9 +15,15 @@ class Settings extends Model
     // Anything that Craft::$app->formatter->asDate() can use
     public string $dateFormat = 'short';
 
+    // The datetime format to use for normalized date time outputs
+    // Anything that Craft::$app->formatter->asDatetime() can use
+    public string $dateTimeFormat = 'short';
+
     // The view mode for entries/assets sub-fields (cards/list)
     public string $entriesViewMode = 'cards';
     public string $assetsViewMode = 'cards';
+
+    public string $currency = 'EUR';
 
     // Whether to enable element query helpers, adds a slight overhead
     public bool $enableElementQueryHelpers = false;

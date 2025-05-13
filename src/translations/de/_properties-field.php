@@ -8,6 +8,7 @@ return [
     'Base Color' => 'Basisfarbe',
     'Cards' => 'Karten',
     'Changing the handle or type may result in data loss or runtime errors without migrating existing content.' => 'Änderungen des Handles oder Typs können zu Datenverlust oder Laufzeitfehlern führen, wenn vorhandene Inhalte nicht migriert werden.',
+    'Currency' => 'Währung',
     'Custom template directory' => 'Benutzerdefiniertes Templateverzeichnis',
     'Enable element query helpers' => 'Element-Query-Methoden aktivieren',
     'Enable methods like propEquals(), propValueSql()...' => 'Aktivieren Sie Methoden wie propEquals(), propValueSql()...',
@@ -30,6 +31,7 @@ return [
     'Show markers on edit forms for properties missing in the database' => 'Zeigen Sie Marker in Bearbeitungsformularen für Eigenschaften an, die in der Datenbank fehlen',
     'Show table header' => 'Tabellenkopf anzeigen',
     'The background color for headers and property labels.' => 'Die Hintergrundfarbe für Kopfzeilen und Eigenschaftsbezeichnungen.',
+    'The currency used for money fields' => 'Die Währung, die für Moneyfelder verwendet wird',
     'The template that renders the preview in element indexes and cards.' => 'Das Template, das die Vorschau in Elementindizes und Karten erzeugt.',
     'This directory will be registered as a template root in the `cp` template mode. You can leave this blank if your project registers its own template root.' => 'Dieses Verzeichnis wird als Template-Root im `cp`-Template-Modus registriert. Sie können dies leer lassen, wenn Ihr Projekt seine eigene Template-Roots registriert.',
     'This is being overridden by the `{setting}` config setting and cannot be changed here.' => 'Dies wird durch die `{setting}`-Konfigurationseinstellung überschrieben und kann hier nicht geändert werden.',
@@ -39,4 +41,5 @@ return [
     'View Mode for entries sub-fields' => 'Ansichtsmodus für Einträge',
     'Works best if the field name is hidden.' => 'Funktioniert am besten, wenn der Feldname ausgeblendet ist.',
     'Yes' => 'Ja',
+
 ];

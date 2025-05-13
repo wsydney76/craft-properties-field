@@ -1,0 +1,38 @@
+{% import '_includes/forms.twig' as forms %}
+
+{% set fieldConfig = propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {} %}
+{% set currency = fieldConfig.currency ?? settings.currency %}
+
+{% if not propertyConfig.required %}
+    {% set options = options|unshift({value: '', label: '-'}) %}
+{% endif %}
+
+{% set field = create({
+    class: 'craft\\fields\\Money',
+    currency: currency
+}) %}
+
+{% set value = field.normalizeValue(value, element) %}
+
+<div class="" style="padding: 8px;">
+    {{ forms.money({
+        name: propertyConfig.handle,
+        currency: currency,
+        currencyLabel: '({currencyCode}) {currencySymbol}'|t({
+            currencyCode: currency,
+            currencySymbol: craft.app.formattingLocale.currencySymbol(currency)
+        }),
+        showCurrency: true,
+        decimals: 2,
+        value: value ? value.getAmount() / 100 : null,
+        defaultValue: null
+    }|merge(fieldConfig)) }}
+</div>
+
+{% css %}
+.money-container input {
+    border: 1px solid rgba(96, 125, 159, 0.4) !important;
+    padding: 0;
+}
+
+{% endcss %}

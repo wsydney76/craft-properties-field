@@ -137,6 +137,8 @@ Just in case: The field can be safely converted to the Craft 5.7 JSON field type
 ### Plugin settings
 
 * Date output format. Defaults to `short`
+* DateTime output format. Defaults to `short`
+* Currency: The default currency for money fields. Defaults to `EUR`
 * Entries/Assets view mode. Defaults to `cards`
 * Custom template directory. Registers a template root in the `cp` template mode, that can be used for custom property
   types inputs or previews. You can leave this blank if your project registers its own template root.
@@ -162,6 +164,8 @@ settings:
     * Text: A single line text field
     * Textarea: A multi-line text field
     * Number: A number field
+    * Money: A money field
+    * Range: A range field
     * Email: An email field
     * URL: An URL field.
     * Boolean: A boolean field (lightswitch)
@@ -174,6 +178,7 @@ settings:
     * Entry/Entries: An entries field with one entry or multiple entries
     * Entry Select/Entries Select: A select field with one entry or multiple entries. Allows to select an entry without opening the selection modal.
     * Asset/Assets: An assets field with one asset or multiple assets
+    * Country: A country field
     * Boolean with comment: A boolean field combined with a comment field (experimental)
     * Table: A table field with configurable columns, incl. entry selection (experimental). See the Table property type
       section below.
@@ -194,6 +199,7 @@ settings:
     * `{"placeholder": "placeholder text"}` for a text field
     * `{"offLabel": "labelText","onLabel": "labelText"}` for a boolean field
     * `{"min": 0,"max": 100,"step": 5, "suffix": "cm"}` for a number field
+    * `{"currency": "USD"}` for a money field
 
   Supported for property types with a single input macro.
 
@@ -427,6 +433,8 @@ Each property is an array with the following keys:
       field for more details.
     * `checkboxes/multiselect`: An instance of `craft\fields\data\MultiOptionsFieldData`. See Craft CMS documentation of the Multiselect
         field for more details
+    * `country`: A `country` model. See Craft CMS documentation of the Country field for more details.
+    * `money`: A `money` model, that can be formatted with the `money` filter. See Craft CMS documentation of the Money field for more details.
     * `boolean with comment`: A string with (translated) Yes/No, and a comment string, e.g. `Yes (Expert level)`
     * `other`: The raw value
 
