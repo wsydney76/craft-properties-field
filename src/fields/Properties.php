@@ -353,60 +353,24 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
         $data = $element->getFieldValue($this->handle);
         $keywords = [];
 
-        // TODO: Implement this via callbacks in the property type config??
+        $propertyTypes = PropertiesFieldPlugin::getInstance()->getSettings()->getAllPropertyTypes();
 
-        foreach ($data->getNormalizedProperties() as $property) {
-            switch ($property['type']) {
-                case 'text':
-                case 'textarea':
-                case 'email':
-                case 'number':
-                    $keywords[] = $property['value'];
-                    break;
-                case 'select':
-                    $keywords[] = $property['normalizedValue']->label ?? '';
-                    break;
-                case 'entry':
-                case 'asset':
-                    if ($property['normalizedValue']) {
-                        $keywords[] = $property['normalizedValue']->title ?? '';
+        foreach ($data->propertiesFieldConfig as $config) {
+
+            if ($config['searchable'] && isset($propertyTypes[$config['type']]['onDefineKeywords'])) {
+                $value = $data->getNormalized($config['handle']);
+                if ($value) {
+                    try {
+                        $keywords[] = call_user_func(
+                            $propertyTypes[$config['type']]['onDefineKeywords'],
+                            $value, $config, $data);
+                    } catch (Exception $e) {
+                        Craft::error($e->getMessage(), __METHOD__);
                     }
-                    break;
-                case 'entries':
-                case 'assets':
-                    if ($property['normalizedValue']) {
-                        foreach ($property['normalizedValue'] as $entry) {
-                            $keywords[] = $entry->title ?? '';
-                        }
-                    }
-                    break;
-                case 'extendedBoolean':
-                    $keywords[] = $property['value']['comment'] ?? '';
-                    $keywords[] = $property['name'];
-                    break;
-                case 'boolean':
-                    $keywords[] = $property['name'];
-                    break;
-                case 'date':
-                case 'groupHeader':
-                case 'set':
-                    // Do nothing
-                    break;
-                default:
-                    // Use event to define search keywords for custom property types
-                    if ($this->hasEventHandlers(self::EVENT_DEFINE_SEARCH_KEYWORDS)) {
-                        $event = new DefineSearchKeywordsEvent([
-                            'element' => $element,
-                            'field' => $this,
-                            'property' => $property,
-                        ]);
-                        $this->trigger(self::EVENT_DEFINE_SEARCH_KEYWORDS, $event);
-                        $keywords[] = $event->keywords;
-                    }
-                    break;
+                }
             }
-        }
 
+        }
         return implode(' ', $keywords);
     }
 
@@ -500,75 +464,7 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
         return null;
     }
 
-    /**
-     * ===================================================================
-     * VALIDATION CALLBACKS
-     * ===================================================================
-     */
 
-    public function validateRequired(ElementInterface $element, Properties $field, array $property, mixed $value): void
-    {
-        if ($property['required'] && !$value) {
-            $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'cannot be blank.'));
-        }
-    }
-
-    public function validateNumber(ElementInterface $element, Properties $field, array $property, mixed $value): void
-    {
-        if (!$value) {
-            return;
-        }
-
-        $fieldConfig = json_decode($property['fieldConfig'], true);
-
-        if (isset($fieldConfig['min'])) {
-            if ($value < $fieldConfig['min']) {
-                $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'must be greater than or equal to {min}.', ['min' => $fieldConfig['min']]));
-            }
-        }
-        if (isset($fieldConfig['max'])) {
-            if ($value > $fieldConfig['max']) {
-                $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'must be less than or equal to {max}.', ['max' => $fieldConfig['max']]));
-            }
-        }
-    }
-
-    public function validateEmail(ElementInterface $element, Properties $field, array $property, mixed $value): void
-    {
-        if (!$value) {
-            return;
-        }
-
-        // TODO: Validator??
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'must be a valid email address.'));
-        }
-    }
-
-    public function validateUrl(ElementInterface $element, Properties $field, array $property, mixed $value): void
-    {
-        if (!$value) {
-            return;
-        }
-
-        if ((new UrlValidator())->validateValue($value)) {
-            $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'must be a valid URL.'));
-        }
-    }
-
-    public function validateExtendedBoolean(ElementInterface $element, Properties $field, array $property, mixed $value): void
-    {
-        if ($property['required'] && !$value['comment']) {
-            $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'Comment cannot be blank.'));
-        }
-    }
-
-    public function validateDimension(ElementInterface $element, Properties $field, array $property, mixed $value): void
-    {
-        if ($property['required'] && !$value['quantity']) {
-            $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'Quantity cannot be blank.'));
-        }
-    }
 
 
     /* --------------------------------------
@@ -603,7 +499,8 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
         $ids = [];
         foreach ($properties as $property) {
             // The types that provide either a single id or an array of IDs
-            if (in_array($property['type'], ['entry', 'entries', 'asset', 'assets'], true) && !empty($property['value'])) {
+            $isRelation = Config::$propertyTypes[$property['type']]['isRelation'] ?? false;
+            if ($isRelation && !empty($property['value'])) {
                 if (is_string($property['value'])) {
                     $ids[] = $property['value'];
                 } else {
