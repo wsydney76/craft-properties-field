@@ -1,7 +1,5 @@
 {% import '_includes/forms.twig' as forms %}
 
-{% set fieldConfig = propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {} %}
-
 {{ forms.text({
     name: propertyConfig.handle,
     type: propertyConfig.type,

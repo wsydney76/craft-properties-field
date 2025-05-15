@@ -19,6 +19,8 @@ use Illuminate\Support\Collection;
 use wsydney76\propertiesfield\fields\Properties;
 use wsydney76\propertiesfield\PropertiesFieldPlugin;
 use yii\base\InvalidConfigException;
+use function call_user_func;
+use function is_array;
 use function is_string;
 use function json_decode;
 use function reset;
@@ -50,11 +52,16 @@ class PropertiesModel extends Model
     public function __construct($config = [])
     {
         $this->settings = PropertiesFieldPlugin::getInstance()->getSettings();
+        $propertyTypes = $this->settings->getAllPropertyTypes();
 
         foreach ($config['propertiesFieldConfig'] as $propertyConfig) {
-            if (in_array($propertyConfig['type'], ['date', 'datetime'], true) && isset($config['properties'][$propertyConfig['handle']])) {
-                $config['properties'][$propertyConfig['handle']] =
-                    DateTimeHelper::toIso8601($config['properties'][$propertyConfig['handle']]);
+            if (isset($propertyTypes[$propertyConfig['type']]['onConstruct']) && isset($config['properties'][$propertyConfig['handle']])) {
+                $property = call_user_func(
+                    $propertyTypes[$propertyConfig['type']]['onConstruct'],
+                    $config['properties'][$propertyConfig['handle']],
+                    $propertyConfig);
+
+                $config['properties'][$propertyConfig['handle']] = $property;
             }
         }
 
@@ -286,6 +293,16 @@ class PropertiesModel extends Model
 
         return $field->normalizeValue($value, new Entry());
     }
+
+    public static function constructDate(mixed $date, array $propertyConfig): string
+    {
+        if ($date && is_array($date)) {
+            $date = DateTimeHelper::toIso8601($date);
+        }
+
+        return $date;
+    }
+
 
     /**
      * Return formatted date string

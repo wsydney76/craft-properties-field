@@ -21,7 +21,7 @@
             values: value ?? '',
             options: options,
             multi: true
-        }|merge(propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {})) }}
+        }|merge(fieldConfig)) }}
 
     {% default %}
 
@@ -29,7 +29,7 @@
             name: propertyConfig.handle,
             values: value ?? '',
             options: options,
-        }|merge(propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {}) %}
+        }|merge(fieldConfig) %}
 
         {% include '_includes/forms/checkboxGroup.twig' with attr only %}
 

@@ -1,15 +1,15 @@
 {% import '_includes/forms.twig' as forms %}
 
-{% set fieldConfig = propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {} %}
-
-<div style=";">
-    {{ forms.range({
-        name: propertyConfig.handle,
-        type: propertyConfig.type,
-        value: value ?? '',
-        min: 0,
-        max: 100
-    }|merge(fieldConfig)) }}
+<div style="padding: 12px;">
+   <div>
+       {{ forms.range({
+           name: propertyConfig.handle,
+           type: propertyConfig.type,
+           value: value ?? '',
+           min: 0,
+           max: 100
+       }|merge(fieldConfig)) }}
+   </div>
 </div>
 
 {% if fieldConfig and 'suffix' in fieldConfig %}

@@ -15,7 +15,7 @@
     name: propertyConfig.handle,
     value: value ?? '',
     options: options,
-}|merge(propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {}) %}
+}|merge(fieldConfig) %}
 
 <div style="padding: 8px;">
     {% include '_includes/forms/radioGroup.twig' with attr only %}

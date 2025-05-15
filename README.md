@@ -710,6 +710,7 @@ return [
             'template' => '_properties-field-inputs/demo.twig',
             'onNormalize' => [MyPropertiesModel::class, 'normalizeDemo'], // Optional, see callbacks section below
             'onValidate' => [[MyPropertiesModel::class, 'validateDemo']], // Optional, see callbacks section below
+            'onConstruct' => [MyPropertiesModel::class, 'constructInCinemas'], // Optional, see callbacks section below
         ]
     ],
 ];
@@ -814,10 +815,26 @@ class MyPropertiesModel
             $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('site', 'Demo went wrong.'));
         }
     }
+    
+    // save dates in ISO format
+    public static function constructInCinemas(array $property, array $propertyConfig): array
+    {
+        if (isset($property['from']) && is_array($property['from'])) {
+            $property['from'] = DateTimeHelper::toIso8601($property['from']);
+        }
+
+        if (isset($property['to']) && is_array($property['to'])) {
+            $property['to'] = DateTimeHelper::toIso8601($property['to']);
+        }
+
+        return $property;
+    }
 }
 ```
 
 ## Migrations:
+
+### Changing subkey handles
 
 Intentionally, the sub keys are the handles of the properties, not a UID. Which means, changing the handle of a property
 in the field requires a content migration.
@@ -843,6 +860,8 @@ SET content = JSON_REMOVE(
 WHERE JSON_CONTAINS_PATH(content, 'one', '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8"."oldHandle"');
 ```
 
+
+
 ## Limitations
 
 * Only supports a limited set of field types
@@ -861,6 +880,21 @@ Regarding translated content:
 * Supports `Copy value from other site` for the whole field.
 * Idea: if the field is translatable, making single sub-fields 'not translatable' could be achieved by syncing the values via hooking into save events.
   See experimental event handler below.
+
+### Setting property values
+
+A property value can be set programmatically via the `PropertiesFieldHelper::updateProperty` method:
+
+```php
+PropertiesFieldHelper::updateProperty(
+    $element,
+    $fieldHandle,
+    $propertyHandle,
+    $value
+)
+```
+
+Does not support nested properties yet.
 
 ## Event handlers
 

@@ -3,6 +3,7 @@
 namespace wsydney76\propertiesfield\helpers;
 
 use Craft;
+use craft\base\ElementInterface;
 use craft\base\FieldInterface;
 use craft\models\FieldLayout;
 use yii\base\InvalidArgumentException;
@@ -103,6 +104,36 @@ class PropertiesFieldHelper
         return $cast ?
             sprintf("CAST(%s AS %s)", $sql, $cast) :
             $sql;
+    }
+
+    public static function updateProperty(ElementInterface $element, string $fieldHandle, string $propertyHandle, mixed $value)
+    {
+        $uid = static::getUid($element->type->handle, $fieldHandle);
+
+        $sql = <<<SQL
+UPDATE elements_sites
+    SET content = JSON_SET(content, '$."%s".%s', "%s")
+    WHERE elementId = %s
+    AND siteId = %s
+SQL;
+
+        $sql = sprintf($sql, $uid, $propertyHandle, $value, $element->id, $element->siteId);
+
+        return Craft::$app->db->createCommand($sql)
+            ->execute();
+    }
+
+    public static function getUid(string $entryTypeHandle, string $fieldHandle): string
+    {
+        $entryType = Craft::$app->entries->getEntryTypeByHandle($entryTypeHandle);
+        if (!$entryType) {
+            throw new InvalidArgumentException("Entry type not found: $entryTypeHandle");
+        }
+        $field = $entryType->getFieldLayout()->getFieldByHandle($fieldHandle);
+        if (!$field) {
+            throw new InvalidArgumentException("Field not found: $fieldHandle");
+        }
+        return $field->layoutElement->uid;
     }
 
 

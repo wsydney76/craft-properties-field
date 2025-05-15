@@ -78,6 +78,7 @@ class Config
             'template' => '_properties-field/_inputs/date.twig',
             'onNormalize' => [PropertiesModel::class, 'normalizeDate'],
             'onValidate' => [[Properties::class, 'validateRequired']],
+            'onConstruct' => [PropertiesModel::class, 'constructDate'],
         ],
         'datetime' => [
             'label' => 'Date Time',
@@ -85,6 +86,7 @@ class Config
             'template' => '_properties-field/_inputs/datetime.twig',
             'onNormalize' => [PropertiesModel::class, 'normalizeDateTime'],
             'onValidate' => [[Properties::class, 'validateRequired']],
+            'onConstruct' => [PropertiesModel::class, 'constructDate'],
         ],
         'select' => [
             'label' => 'Select',

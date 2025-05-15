@@ -1,6 +1,6 @@
 {% import '_includes/forms.twig' as forms %}
 
-{% set fieldConfig = propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {} %}
+
 {% set currency = fieldConfig.currency ?? settings.currency %}
 
 {% if not propertyConfig.required %}
