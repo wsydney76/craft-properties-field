@@ -854,6 +854,8 @@ The plugin does not support condition rules for out of the box because the field
 
 However, you can provide custom condition rules for your project
 
+![Condition rules](images/condition.jpg)
+
 Registration:
 
 ```php
