@@ -850,9 +850,9 @@ WHERE JSON_CONTAINS_PATH(content, 'one', '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b
 
 ## Condition rules
 
-The plugin does not support condition rules for out of the box because the field setup is too complex to be handled.
+The plugin does not support condition rules out of the box because the field setup is too complex to be handled.
 
-However, you can provide custom condition rules for your project
+However, you can provide custom condition rules for your project.
 
 ![Condition rules](images/condition.jpg)
 
