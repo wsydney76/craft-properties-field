@@ -335,10 +335,11 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
                     }
                 }
             } catch (Exception $e) {
-                if (Craft::$app->config->general->devMode) {
-                    \Craft::dd($e->getMessage());
-                }
                 Craft::error($e->getMessage(), __METHOD__);
+                if (Craft::$app->config->general->devMode) {
+                    \Craft::dd($e->getTraceAsString());
+                }
+
             }
         }
     }

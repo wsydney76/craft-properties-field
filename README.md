@@ -156,7 +156,7 @@ settings:
 * Handle: The handle of the property (will be built from the name if not set)
 * Instructions: Instructions for the property, displayed in a popup via an `info` icon
 * Required: Whether the property is required
-    * For type `Boolean with comment`, a comment must be provided.
+    * For type `Boolean with comment`, a comment must be provided if the boolean is on.
     * For type `Dimension`, a quantity must be provided.
 * Search: Whether the property value should be searchable.
 * Type: The type of the property. The following types are supported:
@@ -710,6 +710,7 @@ return [
             'template' => '_properties-field-inputs/demo.twig',
             'onNormalize' => [MyPropertiesModel::class, 'normalizeDemo'], // Optional, see callbacks section below
             'onValidate' => [[MyPropertiesModel::class, 'validateDemo']], // Optional, see callbacks section below
+            'onDefineKeywords' => [[MyPropertiesModel::class, 'keywordsDemo']], // Optional, see callbacks section below
             'onConstruct' => [MyPropertiesModel::class, 'constructInCinemas'], // Optional, see callbacks section below
         ]
     ],
@@ -770,28 +771,10 @@ Use multiple inputs with sub-keys for each input:
 
 Anything that is posted from fields is stored 'as is' in the database json field.
 
-### Search custom property types
-
-Keywords can be added to the search index via an event:
-
-```php
-Event::on(
-    Properties::class,
-    Properties::EVENT_DEFINE_SEARCH_KEYWORDS,
-    function(DefineSearchKeywordsEvent $event) {
-        switch ($event->property['type']) {
-            case 'demo':
-                $event->keywords .= ' ' . $event->property['normalizedValue']['comment'];
-                break;
-        }
-    }
-
-);
-```
 
 ### Callbacks for custom property types
 
-The config can define callbacks for the `onNormalize` and `onValidate` methods.
+The config can define callbacks for the `onNormalize`, `onValidate`, `onConstruct` and `onDefineKeywords` methods.
 
 ```php
 <?php
@@ -829,6 +812,11 @@ class MyPropertiesModel
 
         return $property;
     }
+    
+    public static function keywordsDemo($normalizedValue, $config, $rawData): string
+    {
+        return $rawData['comment'];
+    }
 }
 ```
 
@@ -860,7 +848,81 @@ SET content = JSON_REMOVE(
 WHERE JSON_CONTAINS_PATH(content, 'one', '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b8"."oldHandle"');
 ```
 
+## Condition rules
 
+The plugin does not support condition rules for out of the box because the field setup is too complex to be handled.
+
+However, you can provide custom condition rules for your project
+
+Registration:
+
+```php
+Event::on(BaseCondition::class,
+    BaseCondition::EVENT_REGISTER_CONDITION_RULES,
+    function(RegisterConditionRulesEvent $event) {
+        $event->conditionRules[] = SkillsConditionRule::class;
+    });
+```
+
+Example condition rule class:
+
+```php
+<?php
+
+namespace modules\main\elements\conditions;
+
+use Craft;
+use craft\base\conditions\BaseSelectConditionRule;
+use craft\base\ElementInterface;
+use craft\elements\conditions\ElementConditionRuleInterface;
+use craft\elements\db\ElementQueryInterface;
+use craft\elements\Entry;
+
+/**
+ * Skills Condition Rule element condition rule
+ */
+class SkillsConditionRule extends BaseSelectConditionRule implements ElementConditionRuleInterface
+{
+    function getLabel(): string
+    {
+        return 'Skills';
+    }
+
+    function getExclusiveQueryParams(): array
+    {
+        return [];
+    }
+
+    function modifyQuery(ElementQueryInterface $query): void
+    {
+        $query->propIsOn('propertiesSkills.skills', $this->value);
+    }
+
+    function matchElement(ElementInterface $element): bool
+    {
+        return Entry::find()
+            ->id($element->id)
+            ->status(null)
+            ->provisionalDrafts(null)
+            ->drafts(null)
+            ->propIsOn('propertiesSkills.skills', $this->value)
+            ->exists();
+    }
+
+    protected function options(): array
+    {
+        $field = Craft::$app->getFields()->getFieldByHandle('skills');
+        return collect($field->propertiesFieldConfig)
+            ->filter(fn($skill) => $skill['type'] === 'extendedBoolean')
+            ->map(fn($skill) => [
+                'value' => $skill['handle'],
+                'label' => $skill['name'],
+            ])
+            ->toArray();
+    }
+}
+
+```
 
 ## Limitations
 
@@ -868,9 +930,9 @@ WHERE JSON_CONTAINS_PATH(content, 'one', '$."26a389ed-ea3a-45f9-9f7f-fed91b9896b
 * Does not support all possible field settings
 * Craft is not aware of sub-fields, so the whole field is marked as updated on changes.
 * A translation method can only be used for the whole field, not for sub-fields.
-* No out-of-the-box validation for sub-fields, validation errors cannot be attached to a sub-field.
+* No out-of-the-box validation for sub-fields.
 * No fancy UI for extended sub-field settings.
-* Does not support conditional logic for sub-fields.
+* Does not support conditional logic for sub-fields out of the box.
 * Eager loading of elements is not supported.
 * Does not support standard Craft queries for custom fields.
 * Not tested with Postgres database.

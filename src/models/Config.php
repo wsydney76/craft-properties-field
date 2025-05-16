@@ -24,57 +24,6 @@ use yii\base\InvalidConfigException;
 class Config
 {
 
-    public static function keywordsValue($value): string
-    {
-        return $value;
-    }
-
-    public static function keywordsSingleOptionData($data): string
-    {
-        return $data->label;
-    }
-
-    public static function keywordsMultiOptionsData($data): string
-    {
-        $keywords = '';
-        foreach ($data as $option) {
-            $keywords .= $option->label . ' ';
-        }
-
-        return $keywords;
-    }
-
-
-    public static function keywordsSingleElement($element): string
-    {
-        return $element->title;
-    }
-    public static function keywordsMultiElements($elements): string
-    {
-        return $elements->map(function($element) {
-            return $element->title;
-        })->join(' ');
-    }
-
-    public static function keywordsBoolean($value, $config)
-    {
-        return $value ? Craft::t('site', $config['name']): '';
-    }
-
-    public static function keywordsExtendedBoolean($value, $config, $data)
-    {
-        $value = $data->get($config['handle']);
-        $keywords = $value['isOn'] ? Craft::t('site', $config['name']) : '';
-        $keywords .= " " . $value['comment'];
-
-        return $keywords;
-    }
-
-    public static function keywordsCountry($value): string
-    {
-        return $value->getName();
-    }
-
     public static array $propertyTypes = [
         'text' => [
             'label' => 'Text',
@@ -285,6 +234,11 @@ class Config
         ],
     ];
 
+    /**
+     * ===================================================================
+     * CONSTRUCT CALLBACKS
+     * ===================================================================
+     */
 
     public static function constructDate(mixed $date, array $propertyConfig): string
     {
@@ -305,7 +259,7 @@ class Config
     public static function validateRequired(ElementInterface $element, Properties $field, array $property, mixed $value): void
     {
         if ($property['required'] && !$value) {
-            $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'cannot be blank.'));
+            self::addError($element, $field, $property, Craft::t('_properties-field', 'cannot be blank'));
         }
     }
 
@@ -319,12 +273,12 @@ class Config
 
         if (isset($fieldConfig['min'])) {
             if ($value < $fieldConfig['min']) {
-                $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'must be greater than or equal to {min}.', ['min' => $fieldConfig['min']]));
+                self::addError($element, $field, $property, Craft::t('_properties-field', 'must be greater than or equal to {min}.', ['min' => $fieldConfig['min']]));
             }
         }
         if (isset($fieldConfig['max'])) {
             if ($value > $fieldConfig['max']) {
-                $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'must be less than or equal to {max}.', ['max' => $fieldConfig['max']]));
+                self::addError($element, $field, $property, Craft::t('_properties-field', 'must be less than or equal to {max}.', ['max' => $fieldConfig['max']]));
             }
         }
     }
@@ -337,7 +291,7 @@ class Config
 
         // TODO: Validator??
         if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'must be a valid email address.'));
+            self::addError($element, $field, $property, Craft::t('_properties-field', 'must be a valid email address.'));
         }
     }
 
@@ -348,23 +302,33 @@ class Config
         }
 
         if ((new UrlValidator())->validateValue($value)) {
-            $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'must be a valid URL.'));
+            self::addError($element, $field, $property, Craft::t('_properties-field', 'must be a valid URL.'));
         }
     }
 
     public static function validateExtendedBoolean(ElementInterface $element, Properties $field, array $property, mixed $value): void
     {
-        if ($property['required'] && !$value['comment']) {
-            $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'Comment cannot be blank.'));
+        if (!$value) {
+            return;
+        }
+        if ($property['required'] && $value['isOn'] &&  !$value['comment']) {
+            self::addError($element, $field, $property, Craft::t('_properties-field', 'Comment cannot be blank.'));
         }
     }
 
     public static function validateDimension(ElementInterface $element, Properties $field, array $property, mixed $value): void
     {
         if ($property['required'] && !$value['quantity']) {
-            $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . Craft::t('_properties-field', 'Quantity cannot be blank.'));
+            self::addError($element, $field, $property, Craft::t('_properties-field', 'Quantity cannot be blank.'));
         }
     }
+
+    /**
+     * ===================================================================
+     * NORMALIZATION CALLBACKS
+     * ===================================================================
+     */
+
 
     /**
      * Get entry element (or null)
@@ -549,7 +513,6 @@ class Config
             $value->setOptions($options);
             return $value;
         } catch (Exception $e) {
-
             Craft::error($e->getMessage(), __METHOD__);
             return $value;
         }
@@ -660,6 +623,75 @@ class Config
     protected static function isOptionSelected(array $option, mixed $value, array &$selectedValues, bool &$selectedBlankOption): bool
     {
         return in_array($option['value'], $selectedValues, true);
+    }
+
+
+    /**
+     * ===================================================================
+     * KEYWORDS CALLBACKS
+     * ===================================================================
+     */
+
+    public static function keywordsValue($value): string
+    {
+        return $value;
+    }
+
+    public static function keywordsSingleOptionData($data): string
+    {
+        return $data->label;
+    }
+
+    public static function keywordsMultiOptionsData($data): string
+    {
+        $keywords = '';
+        foreach ($data as $option) {
+            $keywords .= $option->label . ' ';
+        }
+
+        return $keywords;
+    }
+
+
+    public static function keywordsSingleElement($element): string
+    {
+        return $element->title;
+    }
+    public static function keywordsMultiElements($elements): string
+    {
+        return $elements->map(function($element) {
+            return $element->title;
+        })->join(' ');
+    }
+
+    public static function keywordsBoolean($value, $config)
+    {
+        return $value ? Craft::t('site', $config['name']): '';
+    }
+
+    public static function keywordsExtendedBoolean($value, $config, $data)
+    {
+        $value = $data->get($config['handle']);
+        $keywords = $value['isOn'] ? Craft::t('site', $config['name']) : '';
+        $keywords .= " " . $value['comment'];
+
+        return $keywords;
+    }
+
+    public static function keywordsCountry($value): string
+    {
+        return $value->getName();
+    }
+
+    private static function addError(ElementInterface $element, Properties $field, array $property, string $message): void
+    {
+        $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . $message);
+
+        $flash = Craft::$app->getSession()->getFlash('propertiesFieldErrors');
+
+        $flash[$field->handle][$property['handle']] = "{$property['name']}: $message";
+
+        Craft::$app->getSession()->setFlash('propertiesFieldErrors', $flash);
     }
 
 }

@@ -16,6 +16,8 @@
     {% set color = 'gray' %}
 {% endif %}
 
+{% set errors = craft.app.session.flash('propertiesFieldErrors')[field.handle] ?? null %}
+
 {% namespace field.handle %}
     <table class="editable fullwidth properties-field">
 
@@ -94,6 +96,12 @@
                             element,
                             fieldConfig: propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {}
                         }, 'cp')|raw }}
+
+                        {% if errors and errors[propertyConfig.handle] is defined %}
+                            <div style="margin: 4px 8px; color: var(--error-color);">
+                                {{ errors[propertyConfig.handle] }}
+                            </div>
+                        {% endif %}
 
                     </td>
                 </tr>
