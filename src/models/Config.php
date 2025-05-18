@@ -47,6 +47,7 @@ class Config
                 [self::class, 'validateRequired'],
                 [self::class, 'validateNumber'],
             ],
+            'onNormalize' => [self::class, 'normalizeNumber'],
             'onDefineKeywords' => [self::class, 'keywordsValue'],
         ],
         'range' => [
@@ -226,7 +227,8 @@ class Config
         ],
         'groupHeader' => [
             'label' => 'Group Header',
-            'type' => 'groupHeader'
+            'type' => 'groupHeader',
+            'onNormalize' => [self::class, 'normalizeGroupHeader'],
         ],
         'set' => [
             'label' => 'Dynamic Property Set',
@@ -328,6 +330,17 @@ class Config
      * NORMALIZATION CALLBACKS
      * ===================================================================
      */
+
+    public static function normalizeNumber($value, $config)
+    {
+        $fieldConfig = json_decode($config['fieldConfig'], true) ?? [];
+
+        if (isset($fieldConfig['suffix'])) {
+            $value = $value . ' ' . $fieldConfig['suffix'];
+        }
+
+        return $value;
+    }
 
 
     /**
@@ -618,6 +631,11 @@ class Config
         }
 
         return $string;
+    }
+
+    public static function normalizeGroupHeader($value, $config)
+    {
+        return $config['name'];
     }
 
     protected static function isOptionSelected(array $option, mixed $value, array &$selectedValues, bool &$selectedBlankOption): bool

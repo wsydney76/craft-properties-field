@@ -65,7 +65,7 @@
                 <tr>
                     {# The property label #}
                     <th class="heading-cell thin"
-                        style="background-color: var(--{{ color }}-050); text-align: left; padding: 7px;">
+                        style="background-color: var(--{{ color }}-050); text-align: left; padding: 8px;">
                         {{ propertyConfig.name|t }}
 
                         {# Instructions #}
@@ -84,7 +84,7 @@
                     {# Property inputs using configured template #}
                     <td class="singleline-cell textual"
                         {% if field.enableMissingMarkers %}
-                            style="border-left:4px solid {{ properties[propertyConfig.handle] is not defined ? 'var(--red-700)' : 'transparent' }}"
+                            style="border-left:4px solid {{ properties[propertyConfig.handle] is not defined ? 'var(--red-700)' : 'transparent' }};"
                         {% endif %}
                     >
                         {% set template = settings.extraPropertyTypes[propertyConfig.type].template ?? defaultPropertyTypes[propertyConfig.type].template %}
@@ -134,11 +134,11 @@
 }
 
 .group-header {
-    font-weight: 700 !important;
+    /*font-weight: 700 !important;*/
 
     background-color: var(--{{ color }}-100) !important;
-    text-transform: uppercase;
+    /*text-transform: uppercase;*/
     letter-spacing: 1px;
-    padding: 8px 0;
+    padding: 4px 0;
 }
 {% endcss %}

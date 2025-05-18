@@ -99,7 +99,7 @@ class PropertiesModel extends Model
 
         foreach ($this->propertiesFieldConfig as $propertyConfig) {
 
-            if ($props['ignoreMissing'] && !isset($this->properties[$propertyConfig['handle']])) {
+            if ($props['ignoreMissing'] && $propertyConfig['type'] !== 'groupHeader' && !isset($this->properties[$propertyConfig['handle']])) {
                 continue;
             }
 
@@ -110,7 +110,7 @@ class PropertiesModel extends Model
 
             $value = $this->properties[$propertyConfig['handle']] ?: $props['default'];
 
-            if ($props['ignoreEmpty'] && empty($value)) {
+            if ($props['ignoreEmpty'] && $propertyConfig['type'] !== 'groupHeader' && empty($value)) {
                 continue;
             }
 

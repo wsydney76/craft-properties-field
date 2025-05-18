@@ -93,6 +93,12 @@ If enabled in the field settings, newly added properties that are missing in the
 
 See the [Templating](#templating) section for more details on how to output/search this in your templates.
 
+### Side by side
+
+Enable a compact author-friendly layout.
+
+![Side by side](images/side-by-side.jpg)
+
 ## Storage
 
 The field stores the data posted from the edit form "as-is" in a JSON field (just date fields are converted to ISO

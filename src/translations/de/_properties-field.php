@@ -8,6 +8,7 @@ return [
     'Base Color' => 'Basisfarbe',
     'Cards' => 'Karten',
     'Changing the handle or type may result in data loss or runtime errors without migrating existing content.' => 'Änderungen des Handles oder Typs können zu Datenverlust oder Laufzeitfehlern führen, wenn vorhandene Inhalte nicht migriert werden.',
+    'Comment' => 'Kommentar',
     'Currency' => 'Währung',
     'Custom template directory' => 'Benutzerdefiniertes Templateverzeichnis',
     'Enable element query helpers' => 'Element-Query-Methoden aktivieren',
