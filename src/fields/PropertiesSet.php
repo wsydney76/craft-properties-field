@@ -5,14 +5,11 @@ namespace wsydney76\propertiesfield\fields;
 use Craft;
 use craft\fields\Table;
 use craft\helpers\StringHelper;
-use wsydney76\propertiesfield\fields\traits\PropertiesTrait;
 use wsydney76\propertiesfield\models\Config;
-use wsydney76\propertiesfield\PropertiesFieldPlugin;
 
 class PropertiesSet extends Table
 {
 
-    use PropertiesTrait;
 
     public function init(): void
     {
@@ -63,7 +60,8 @@ class PropertiesSet extends Table
             // Name is required
             if (empty($fieldConfig['name'])) {
                 $element->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Name cannot be blank.'));
-            }{
+            }
+            {
                 // generate handle from name if handle is empty
                 if (empty($fieldConfig['handle'])) {
                     // If handle is empty, use name as handle

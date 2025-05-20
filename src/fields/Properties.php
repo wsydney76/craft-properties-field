@@ -12,10 +12,7 @@ use craft\elements\Entry;
 use craft\errors\InvalidFieldException;
 use craft\helpers\Cp;
 use craft\helpers\StringHelper;
-use craft\validators\UrlValidator;
 use Exception;
-use wsydney76\propertiesfield\events\DefineSearchKeywordsEvent;
-use wsydney76\propertiesfield\fields\traits\PropertiesTrait;
 use wsydney76\propertiesfield\models\Config;
 use wsydney76\propertiesfield\models\PropertiesModel;
 use wsydney76\propertiesfield\PropertiesFieldPlugin;
@@ -26,8 +23,6 @@ use yii\db\Schema;
  */
 class Properties extends Field implements RelationalFieldInterface, CrossSiteCopyableFieldInterface, PreviewableFieldInterface
 {
-
-    use PropertiesTrait;
 
     public const string EVENT_DEFINE_SEARCH_KEYWORDS = 'defineSearchKeywords';
 
