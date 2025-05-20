@@ -15,6 +15,7 @@ use Exception;
 use wsydney76\propertiesfield\models\Config;
 use wsydney76\propertiesfield\models\PropertiesModel;
 use wsydney76\propertiesfield\PropertiesFieldPlugin;
+use yii\base\InvalidConfigException;
 use yii\db\Schema;
 
 /**
@@ -349,7 +350,12 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
                         ->one();
                     if ($setEntry) {
 
-                        $extraConfigs = $setEntry->getFieldValue($settings->dynamicPropertiesFieldHandle);
+                        try {
+                            $extraConfigs = $setEntry->getFieldValue($settings->dynamicPropertiesFieldHandle);
+                        } catch (InvalidFieldException $e) {
+                            // This can happen if the field is not set on the entry
+                            throw new InvalidConfigException( "Set entry ID: {$setEntry->id} does not have the field {$settings->dynamicPropertiesFieldHandle} set.");
+                        }
                         if ($extraConfigs === null) {
                             continue;
                         }

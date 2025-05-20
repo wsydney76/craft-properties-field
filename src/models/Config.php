@@ -769,7 +769,7 @@ class Config
                 'options' => $options,
                 'width' => '10%',
             ],
-            'propertyTypes' => [
+            'options' => [
                 'heading' => Craft::t('_properties-field', 'Options'),
                 'handle' => 'propertyTypes',
                 'type' => 'multiline',
