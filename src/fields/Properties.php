@@ -11,7 +11,6 @@ use craft\base\RelationalFieldInterface;
 use craft\elements\Entry;
 use craft\errors\InvalidFieldException;
 use craft\helpers\Cp;
-use craft\helpers\StringHelper;
 use Exception;
 use wsydney76\propertiesfield\models\Config;
 use wsydney76\propertiesfield\models\PropertiesModel;
@@ -23,6 +22,8 @@ use yii\db\Schema;
  */
 class Properties extends Field implements RelationalFieldInterface, CrossSiteCopyableFieldInterface, PreviewableFieldInterface
 {
+
+    use PropertiesTrait;
 
     public const string EVENT_DEFINE_SEARCH_KEYWORDS = 'defineSearchKeywords';
 
@@ -100,42 +101,12 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
      */
     public function checkConfig($attribute): void
     {
-        $handles = [];
-        foreach ($this->propertiesFieldConfig as $i => $fieldConfig) {
-
-            // Name is required
-            if (empty($fieldConfig['name'])) {
-                $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Name cannot be blank.'));
-            } else {
-                // generate handle from name if handle is empty
-                if (empty($fieldConfig['handle'])) {
-                    // If handle is empty, use name as handle
-                    $fieldConfig['handle'] = StringHelper::toHandle($fieldConfig['name']);
-                    $this->propertiesFieldConfig[$i]['handle'] = $fieldConfig['handle'];
-                }
+        $this->propertiesFieldConfig = $this->validateConfig(
+            $this->propertiesFieldConfig,
+            function ($error) use ($attribute) {
+                $this->addError($attribute, $error);
             }
-
-            // Handle is required, must be a valid handle and unique
-            if (empty($fieldConfig['handle'])) {
-                $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Handle cannot be blank.'));
-            } elseif (!(bool)preg_match('/^[a-zA-Z][a-zA-Z0-9_]*$/', $fieldConfig['handle'])) {
-                $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Is not a valid handle.'));
-            } elseif (in_array($fieldConfig['handle'], $handles, true)) {
-                $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Handle must be unique.'));
-            } else {
-                $handles[] = $fieldConfig['handle'];
-            }
-
-
-            // Field config must be a valid JSON string
-            if (!empty($fieldConfig['fieldConfig'])) {
-                // Check if fieldConfig is a valid JSON string
-                $isValidJson = json_decode($fieldConfig['fieldConfig'], true);
-                if ($isValidJson === null) {
-                    $this->addError($attribute, Craft::t('_properties-field', $i + 1 . ': Field Config must be a valid JSON string.'));
-                }
-            }
-        }
+        );
     }
 
     /**
