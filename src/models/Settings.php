@@ -3,6 +3,7 @@
 namespace wsydney76\propertiesfield\models;
 
 use craft\base\Model;
+use phpDocumentor\Reflection\Types\Boolean;
 use function array_merge;
 
 class Settings extends Model
@@ -30,6 +31,12 @@ class Settings extends Model
 
     // Where to find input templates for custom property types
     public string $customTemplateDir = '';
+
+    // Whether to enable dynamic properties
+    public bool $enableDynamicProperties = false;
+
+    // The field name that holds the dynamic properties
+    public string $dynamicPropertiesFieldHandle = 'propertiesSet';
 
     // Custom property types as defined in config/_properties-field.php
     public array $extraPropertyTypes = [];

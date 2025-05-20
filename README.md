@@ -325,10 +325,9 @@ the editor, and can be output via a generic template.
 
 Experimental approach:
 
-* Create a new section/entry type with a field layout containing a `propertiesConfig` table field.
-* This field matches the field settings, a yaml file is included in the plugin's config folder as a starting point.
-    * Copy to `config/project/fields`
-    * Run `ddev craft project-config/apply` to update the project config.
+* Enable the `Enable dynamic property config` setting in the field settings.
+* Create a custom field with the type `Properties Set`. (This is just a table field with default settings, matching the plugin's field type settings.)
+* Create a new section/entry type with a field layout containing that field, where the handle matches the `Field handle for dynamic properties` setting. Defaults to `propertiesSet`.
 * Create a new entry in this section, and add the properties you want to use.
 * In the fields settings, create a property type with the type `Dynamic property set` and the slug of the entry that
   holds the property set.

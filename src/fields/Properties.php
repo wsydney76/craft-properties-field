@@ -15,6 +15,7 @@ use craft\helpers\StringHelper;
 use craft\validators\UrlValidator;
 use Exception;
 use wsydney76\propertiesfield\events\DefineSearchKeywordsEvent;
+use wsydney76\propertiesfield\fields\traits\PropertiesTrait;
 use wsydney76\propertiesfield\models\Config;
 use wsydney76\propertiesfield\models\PropertiesModel;
 use wsydney76\propertiesfield\PropertiesFieldPlugin;
@@ -26,6 +27,7 @@ use yii\db\Schema;
 class Properties extends Field implements RelationalFieldInterface, CrossSiteCopyableFieldInterface, PreviewableFieldInterface
 {
 
+    use PropertiesTrait;
 
     public const string EVENT_DEFINE_SEARCH_KEYWORDS = 'defineSearchKeywords';
 
@@ -190,23 +192,7 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
                 'allowReorder' => true,
                 'allowDelete' => true,
                 'warning' => Craft::t('_properties-field', 'Changing the handle or type may result in data loss or runtime errors without migrating existing content.'),
-                'cols' => [
-                    'name' => ['heading' => Craft::t('_properties-field', 'Name'), 'type' => 'singleline'],
-                    'handle' => ['heading' => Craft::t('_properties-field', 'Handle'), 'type' => 'singleline', 'class' => 'code'],
-                    'instructions' => ['heading' => Craft::t('_properties-field', 'Instructions'), 'type' => 'singleline'],
-                    'required' => ['heading' => Craft::t('_properties-field', 'Required'), 'type' => 'lightswitch'],
-                    'searchable' => ['heading' => Craft::t('_properties-field', 'Search'), 'type' => 'lightswitch'],
-                    'type' => [
-                        'heading' => Craft::t('_properties-field', 'Type'),
-                        'type' => 'select',
-                        'class' => 'code',
-                        'options' => $options,
-                        'width' => '10%',
-                    ],
-                    'options' => ['heading' => Craft::t('_properties-field', 'Options'), 'type' => 'multiline'],
-                    'fieldConfig' => ['heading' => Craft::t('_properties-field', 'Field Config'), 'type' => 'multiline'],
-
-                ],
+                'cols' => Config::getConfigTableColumns(),
                 'rows' => $this->propertiesFieldConfig,
                 'errors' => $this->getErrors('propertiesFieldConfig'),
                 'data' => ['error-key' => 'options'],
@@ -386,30 +372,40 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
      */
     private function expandPropertySet($propertiesFieldConfig, bool $expandTableCriteria = true)
     {
+        $settings = PropertiesFieldPlugin::getInstance()->getSettings();
+
         $newConfig = [];
-        foreach ($propertiesFieldConfig as $i => $config) {
-            if ($config['type'] == 'set') {
-                $setEntry = Entry::find()
-                    ->slug($config['options'])
-                    ->one();
-                if ($setEntry) {
-                    $extraConfigs = $setEntry->propertyTypes;
-                    foreach ($extraConfigs as $extraConfig) {
-                        $newConfig[] = [
-                            'name' => $extraConfig['name'] ?? '',
-                            'handle' => $extraConfig['handle'] ?? '',
-                            'instructions' => $extraConfig['instructions'] ?? '',
-                            'required' => $extraConfig['required'] ?? false,
-                            'searchable' => $extraConfig['required'] ?? false,
-                            'type' => $extraConfig['type'] ?? '',
-                            'options' => $extraConfig['options'] ?? '',
-                            'fieldConfig' => $extraConfig['fieldConfig'] ?? '',
-                        ];
+        if ($settings->enableDynamicProperties) {
+            foreach ($propertiesFieldConfig as $i => $config) {
+                if ($config['type'] == 'set') {
+                    $setEntry = Entry::find()
+                        ->slug($config['options'])
+                        ->one();
+                    if ($setEntry) {
+
+                        $extraConfigs = $setEntry->getFieldValue($settings->dynamicPropertiesFieldHandle);
+                        if ($extraConfigs === null) {
+                            continue;
+                        }
+                        foreach ($extraConfigs as $extraConfig) {
+                            $newConfig[] = [
+                                'name' => $extraConfig['name'] ?? '',
+                                'handle' => $extraConfig['handle'] ?? '',
+                                'instructions' => $extraConfig['instructions'] ?? '',
+                                'required' => $extraConfig['required'] ?? false,
+                                'searchable' => $extraConfig['required'] ?? false,
+                                'type' => $extraConfig['type'] ?? '',
+                                'options' => $extraConfig['options'] ?? '',
+                                'fieldConfig' => $extraConfig['fieldConfig'] ?? '',
+                            ];
+                        }
                     }
+                } else {
+                    $newConfig[] = $config;
                 }
-            } else {
-                $newConfig[] = $config;
             }
+        } else {
+            $newConfig = $propertiesFieldConfig;
         }
 
         // If a pseudo 'entrySelect' table column is found, replace it with a select based on an entry query with the given criteria

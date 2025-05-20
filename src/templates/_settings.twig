@@ -80,6 +80,22 @@
     warning: config.enableElementQueryHelpers is defined ? _self.configWarning('enableElementQueryHelpers')
 }) }}
 
+{{ forms.lightswitchField({
+    label: 'Enable dynamic properties'|t('_properties-field'),
+    name: 'enableDynamicProperties',
+    on: settings.enableDynamicProperties,
+    onLabel: 'Enable the ability to define property type dynamically via content as opposed to project config'|t('_properties-field'),
+    warning: config.enableDynamicProperties is defined ? _self.configWarning('enableDynamicProperties')
+}) }}
+
+{{ forms.textField({
+    label: 'Field handle for dynamic properties'|t('_properties-field'),
+    name: 'dynamicPropertiesFieldHandle',
+    value: settings.dynamicPropertiesFieldHandle,
+    instructions: 'The handle of a custom field of type `Property Set` that holds the property config.'|t('_properties-field'),
+    warning: config.dynamicPropertiesFieldHandle is defined ? _self.configWarning('dynamicPropertiesFieldHandle')
+}) }}
+
 {% macro configWarning(setting) -%}
     {{ 'This is being overridden by the `{setting}` config setting and cannot be changed here.'|t('_properties-field', {setting: setting })|markdown(inlineOnly=true) }}
 {%- endmacro %}

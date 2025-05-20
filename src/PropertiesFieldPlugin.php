@@ -14,6 +14,7 @@ use craft\services\Fields;
 use craft\web\View;
 use wsydney76\propertiesfield\behaviors\EntryQueryBehavior;
 use wsydney76\propertiesfield\fields\Properties;
+use wsydney76\propertiesfield\fields\PropertiesSet;
 use wsydney76\propertiesfield\models\Settings;
 use wsydney76\propertiesfield\web\twig\PropertiesFieldExtension;
 
@@ -46,7 +47,16 @@ class PropertiesFieldPlugin extends Plugin
                     $event->types[] = Properties::class;
                 });
 
-            if ($this->settings->enableElementQueryHelpers) {
+            if ($this->getSettings()->enableDynamicProperties) {
+                Event::on(
+                    Fields::class,
+                    Fields::EVENT_REGISTER_FIELD_TYPES,
+                    function(RegisterComponentTypesEvent $event) {
+                        $event->types[] = PropertiesSet::class;
+                    });
+            }
+
+            if ($this->getSettings()->enableElementQueryHelpers) {
                 Event::on(
                     EntryQuery::class,
                     Query::EVENT_DEFINE_BEHAVIORS,

@@ -232,7 +232,8 @@ class Config
         ],
         'set' => [
             'label' => 'Dynamic Property Set',
-            'type' => 'set'
+            'type' => 'set',
+            'template' => '_properties-field/_inputs/set.twig'
         ],
     ];
 
@@ -710,6 +711,75 @@ class Config
         $flash[$field->handle][$property['handle']] = "{$property['name']}: $message";
 
         Craft::$app->getSession()->setFlash('propertiesFieldErrors', $flash);
+    }
+
+
+    /**
+     * Table input columns for properties config
+     *
+     * @return array
+     */
+    public static function getConfigTableColumns(): array
+    {
+        $settings = PropertiesFieldPlugin::getInstance()->getSettings();
+
+        $propertyTypes = array_merge(Config::$propertyTypes, $settings->extraPropertyTypes);
+
+        $options = [];
+
+        foreach ($propertyTypes as $option) {
+            $options[] = [
+                'label' => $option['label'],
+                'value' => $option['type'],
+            ];
+        }
+
+
+        return [
+            'name' => [
+                'heading' => Craft::t('_properties-field', 'Name'),
+                'handle' => 'name',
+                'type' => 'singleline',
+            ],
+            'handle' => [
+                'heading' => Craft::t('_properties-field', 'Handle'),
+                'handle' => 'handle',
+                'type' => 'singleline',
+                'class' => 'code',
+            ],
+            'instructions' => [
+                'heading' => Craft::t('_properties-field', 'Instructions'),
+                'handle' => 'instructions',
+                'type' => 'singleline',
+            ],
+            'required' => [
+                'heading' => Craft::t('_properties-field', 'Required'),
+                'handle' => 'required',
+                'type' => 'lightswitch',
+            ],
+            'searchable' => [
+                'heading' => Craft::t('_properties-field', 'Searchable'),
+                'handle' => 'required',
+                'type' => 'lightswitch',
+            ],
+            'type' => [
+                'heading' => Craft::t('_properties-field', 'Type'),
+                'handle' => 'type',
+                'type' => 'select',
+                'options' => $options,
+                'width' => '10%',
+            ],
+            'propertyTypes' => [
+                'heading' => Craft::t('_properties-field', 'Options'),
+                'handle' => 'propertyTypes',
+                'type' => 'multiline',
+            ],
+            'fieldConfig' => [
+                'heading' => Craft::t('_properties-field', 'Field Config'),
+                'handle' => 'fieldConfig',
+                'type' => 'multiline',
+            ],
+        ];
     }
 
 }
