@@ -3,7 +3,6 @@
 namespace wsydney76\propertiesfield\fields;
 
 use craft\fields\Table;
-use wsydney76\propertiesfield\models\Config;
 
 class PropertiesSet extends Table
 {
@@ -15,7 +14,7 @@ class PropertiesSet extends Table
         parent::init();
 
         if ($this->columns === []) {
-            $this->columns = Config::getConfigTableColumns();
+            $this->columns = $this->getConfigTableColumns();
         }
     }
 

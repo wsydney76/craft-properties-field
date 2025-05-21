@@ -117,9 +117,7 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
      */
     public function getSettingsHtml(): ?string
     {
-        $settings = PropertiesFieldPlugin::getInstance()->getSettings();
 
-        $options = array_merge(Config::$propertyTypes, $settings->extraPropertyTypes);
         return
             Cp::iconPickerFieldHtml([
                 'label' => Craft::t('_properties-field', 'Icon'),
@@ -159,7 +157,7 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
                 'allowReorder' => true,
                 'allowDelete' => true,
                 'warning' => Craft::t('_properties-field', 'Changing the handle or type may result in data loss or runtime errors without migrating existing content.'),
-                'cols' => Config::getConfigTableColumns(),
+                'cols' => $this->getConfigTableColumns(),
                 'rows' => $this->propertiesFieldConfig,
                 'errors' => $this->getErrors('propertiesFieldConfig'),
                 'data' => ['error-key' => 'options'],
@@ -455,7 +453,7 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
      */
     public function forceUpdateRelations(ElementInterface $element): bool
     {
-        return true;
+        return false;
     }
 
     /**
