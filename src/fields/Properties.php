@@ -334,6 +334,7 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
      * @param $propertiesFieldConfig
      * @param bool $expandTableCriteria
      * @return array
+     * @throws InvalidConfigException
      */
     private function expandPropertySet($propertiesFieldConfig, bool $expandTableCriteria = true)
     {

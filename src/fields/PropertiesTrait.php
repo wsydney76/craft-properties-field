@@ -49,6 +49,12 @@ trait PropertiesTrait
                     $addErrorCallback($i + 1 . ': ' . Craft::t('_properties-field', 'Field Config must be a valid JSON string.'));
                 }
             }
+
+            if (in_array($fieldConfig['type'], ['entry', 'entries', 'entrySelect', 'asset', 'assets'], true)) {
+                if (empty($fieldConfig['options'])) {
+                    $addErrorCallback($i + 1 . ': ' . Craft::t('_properties-field', 'Options are required for this type.'));
+                }
+            }
         }
 
         return $config;

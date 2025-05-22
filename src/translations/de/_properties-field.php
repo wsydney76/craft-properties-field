@@ -26,6 +26,7 @@ return [
     'No' => 'Nein',
     'Options for select: one option per line, in the format value:label<br>Options for entries/assets: section/volume handles, comma separated' => 'Optionen für Select: eine Option pro Zeile, im Format Wert:Bezeichnung<br>Optionen für Einträge/Assets: Abschnitts-/Volumen-Handles, durch Kommas getrennt',
     'Options' => 'Optionen',
+    'Options are required for this type.' => 'Optionen sind für diesen Typ erforderlich.',
     'Placeholder' => 'Platzhalter',
     'Preview template' => 'Vorschau-Template',
     'Properties Configuration' => 'Eigenschaften-Konfiguration',

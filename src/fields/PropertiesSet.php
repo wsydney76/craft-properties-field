@@ -42,7 +42,7 @@ class PropertiesSet extends Table
         );
     }
 
-    public function checkConfig($element)
+    public function checkConfig($element): void
     {
         $value = $element->getFieldValue($this->handle);
 
