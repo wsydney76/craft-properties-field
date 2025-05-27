@@ -74,7 +74,6 @@ Work in progress. Not tested in a multi-site environment.
 
 ![Field input](images/field-input3.jpg)
 
-
 ### Use in a matrix block
 
 ![Columns settings](images/column.jpg)
@@ -87,7 +86,8 @@ Work in progress. Not tested in a multi-site environment.
 This kind of setup is actually one of the main use cases for this plugin, as it allows to add/remove/rearrange
 properties consistently without creating a myriad of fields/matrix blocks.
 
-If enabled in the field settings, newly added properties that are missing in the database are marked by a red border, so that the editor can easily spot them.
+If enabled in the field settings, newly added properties that are missing in the database are marked by a red border, so
+that the editor can easily spot them.
 
 ![Marker](images/missing-marker.jpg)
 
@@ -153,7 +153,8 @@ Just in case: The field can be safely converted to the Craft 5.7 JSON field type
 
 Color: The background color of group headers and property labels. Defaults to `no color` (aka gray)
 
-Icon/Heading/Additional heading text: Display a title row with an icon and a heading. Works best if the field name is hidden in the entry type's field layout.
+Icon/Heading/Additional heading text: Display a title row with an icon and a heading. Works best if the field name is
+hidden in the entry type's field layout.
 
 Property types configuration: A list of properties to be displayed in the field. Each property has the following
 settings:
@@ -182,7 +183,8 @@ settings:
     * Date: A date field
     * DateTime: A date/time field
     * Entry/Entries: An entries field with one entry or multiple entries
-    * Entry Select/Entries Select: A select field with one entry or multiple entries. Allows to select an entry without opening the selection modal.
+    * Entry Select/Entries Select: A select field with one entry or multiple entries. Allows to select an entry without
+      opening the selection modal.
     * Asset/Assets: An assets field with one asset or multiple assets
     * Country: A country field
     * Boolean with comment: A boolean field combined with a comment field (experimental)
@@ -209,12 +211,15 @@ settings:
 
   Supported for property types with a single input macro.
 
-Enable missing property marker: If enabled, a red border is displayed around properties that are missing in the database. This is useful for
-  editors to spot properties that need to be set.
+Enable missing property marker: If enabled, a red border is displayed around properties that are missing in the
+database. This is useful for
+editors to spot properties that need to be set.
 
-Preview template: A twig template that is used to render the preview of the property. This is used for a element index columns and cards. See preview section below.
+Preview template: A twig template that is used to render the preview of the property. This is used for a element index
+columns and cards. See preview section below.
 
-Tip/Warning: Show a tip/warning. This allows to have consistent settings across all usages. Unlike instructions, tips/warnings added in a field layout do not override the field settings.
+Tip/Warning: Show a tip/warning. This allows to have consistent settings across all usages. Unlike instructions,
+tips/warnings added in a field layout do not override the field settings.
 
 ## Defaults
 
@@ -230,7 +235,8 @@ craft _properties-field/set-default entryTypeHandle fieldHandle propertyHandle v
 
 Handles only scalar values for now.
 
-For recurring workflows, like adding a new 'skill', you may think of a utility that allows to bulk update the property for all relevant entries at once.
+For recurring workflows, like adding a new 'skill', you may think of a utility that allows to bulk update the property
+for all relevant entries at once.
 
 ## Table property type
 
@@ -275,7 +281,8 @@ This will dynamically build options with the entry id as value and the entry tit
 }
 ```
 
-Currently, there is no helper function implemented for querying the table property type, but it can be achieved with raw SQL:
+Currently, there is no helper function implemented for querying the table property type, but it can be achieved with raw
+SQL:
 
 Search for exact value:
 
@@ -306,6 +313,7 @@ Search with wildcards:
 
 {% set entries = craft.entries.id(ids).all %}
 ```
+
 (Query AI generated...)
 
 ## Dynamic property config
@@ -326,13 +334,14 @@ the editor, and can be output via a generic template.
 Experimental approach:
 
 * Enable the `Enable dynamic property config` setting in the field settings.
-* Create a custom field with the type `Properties Set`. (This is just a table field with default settings, matching the plugin's field type settings.)
-* Create a new section/entry type with a field layout containing that field, where the handle matches the `Field handle for dynamic properties` setting. Defaults to `propertiesSet`.
+* Create a custom field with the type `Properties Set`. (This is just a table field with default settings, matching the
+  plugin's field type settings.)
+* Create a new section/entry type with a field layout containing that field, where the handle matches the
+  `Field handle for dynamic properties` setting. Defaults to `propertiesSet`.
 * Create a new entry in this section, and add the properties you want to use.
 * In the fields settings, create a property type with the type `Dynamic property set` and the slug of the entry that
   holds the property set.
 * This will load the configs from the entry and insert them at that position.
-
 
 ## Templating
 
@@ -353,8 +362,10 @@ So always code defensively and check for the existence or type of property befor
 
 ### Access via JsonData
 
-Starting with Craft 5.7, you can access the configured properties via the `JsonData` class, which allows to use the same methods as
-for the standard Craft JSON field (see [Docs](https://craftcms.com/docs/5.x/reference/field-types/json.html#development)).
+Starting with Craft 5.7, you can access the configured properties via the `JsonData` class, which allows to use the same
+methods as
+for the standard Craft JSON field (
+see [Docs](https://craftcms.com/docs/5.x/reference/field-types/json.html#development)).
 
 ```twig
 {% set props = entry.fieldHandle.getJsonData() %}
@@ -421,6 +432,23 @@ __Set a default value for empty properties:__
 {% endfor %}    
 ```
 
+The normalized value can be changed via an event handler.
+
+```php
+Event::on(
+    PropertiesModel::class,
+    PropertiesModel::EVENT_GET_NORMALIZED_VALUE,
+    function(GetNormalizedValueEvent $event) {
+        if (
+            $event->value &&
+            $event->element->section->handle == 'volunteer' &&
+            $event->field->handle == 'personalData' &&
+            $event->propertyConfig['handle'] == 'birthday') {
+            $event->normalizedValue = substr($event->value, 0, 4);
+        }
+    });
+```
+
 If the property is not set in the database, `prop.value` will be the default value. `prop.normalizedValue` will depend
 on the type of the property (e.g. null for element selects).
 
@@ -434,12 +462,15 @@ Each property is an array with the following keys:
     * `date/datetime`: A formated date string
     * `entry/asset/entrySelect`: A single element (or null)
     * `entries/assets/entriesSelect`: An array of elements (or empty array)
-    * `select/radio`: An instance of `craft\fields\data\SingleOptionFieldData`. See Craft CMS documentation of the Dropdown
+    * `select/radio`: An instance of `craft\fields\data\SingleOptionFieldData`. See Craft CMS documentation of the
+      Dropdown
       field for more details.
-    * `checkboxes/multiselect`: An instance of `craft\fields\data\MultiOptionsFieldData`. See Craft CMS documentation of the Multiselect
-        field for more details
+    * `checkboxes/multiselect`: An instance of `craft\fields\data\MultiOptionsFieldData`. See Craft CMS documentation of
+      the Multiselect
+      field for more details
     * `country`: A `country` model. See Craft CMS documentation of the Country field for more details.
-    * `money`: A `money` model, that can be formatted with the `money` filter. See Craft CMS documentation of the Money field for more details.
+    * `money`: A `money` model, that can be formatted with the `money` filter. See Craft CMS documentation of the Money
+      field for more details.
     * `boolean with comment`: A string with (translated) Yes/No, and a comment string, e.g. `Yes (Expert level)`
     * `other`: The raw value
 
@@ -467,6 +498,7 @@ A preview template for a field can be defined in the field settings. This is use
 ![Card](images/card.jpg)
 
 The template receives the following variables:
+
 * `element`: The element object
 * `value`: The field value
 
@@ -485,7 +517,6 @@ Example:
 {% endif %}
 ```
 
-
 ## Querying
 
 The standard Craft way of querying for custom field values does not work out of the box, as the field is stored in a
@@ -495,7 +526,8 @@ As a workaround, the plugin provides a set of query methods that can be used to 
 property values.
 
 * Enable the `Enable element query helpers` setting.
-* A properties field can be accessed in the form `entryTypeHandle.fieldHandle` or `fieldHandle` if the field is used in multiple entry types.
+* A properties field can be accessed in the form `entryTypeHandle.fieldHandle` or `fieldHandle` if the field is used in
+  multiple entry types.
 
 ### Query methods
 
@@ -505,7 +537,6 @@ The following query methods are available via a behavior:
 * `propLike()` (for scalar values, uses `LIKE` in the SQL query)
 * `propContains()` (for array elements, e.g. entries/assets property types)
 * `propIsOn()` (for 'Boolean with comment' property type)
-
 
 ```twig
 .propEquals('entryTypeHandle.fieldHandle', 'subfieldHandle', 'value')
@@ -547,11 +578,15 @@ The following query methods are available via a behavior:
 
 Experimental, work in progress.
 
-A `propValueSql(fieldIdent, prop [, cast])` method is available in twig that returns a SQL string that can be used in a query (`PropertiesFieldHelper::propValueSql()` for PHP).
+A `propValueSql(fieldIdent, prop [, cast])` method is available in twig that returns a SQL string that can be used in a
+query (`PropertiesFieldHelper::propValueSql()` for PHP).
 
-* `propValueSql('propertiesFilm.filmProps', 'seasonEpisode.season')` => `JSON_UNQUOTE(JSON_EXTRACT(content, '$."1cdf8ca4-f462-4ab7-a19a-9a2df1ee1bba".seasonEpisode.season'))`
-* `propValueSql('propertiesFilm.filmProps', 'seasonEpisode.episode', 'SIGNED')` => `CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$."1cdf8ca4-f462-4ab7-a19a-9a2df1ee1bba".seasonEpisode.episode')) AS SIGNED)`
-* `propValueSql('profile', 'seasonEpisode.episode')` => `COALESCE(JSON_UNQUOTE(JSON_EXTRACT(content, '$."79e7fc9f-5cff-41c5-bbd3-c5dff87e34f4".name')), JSON_UNQUOTE(JSON_EXTRACT(content, '$."6d9b91f3-ffac-450b-ba63-3a632a1b1dd1".name')))`
+* `propValueSql('propertiesFilm.filmProps', 'seasonEpisode.season')` =>
+  `JSON_UNQUOTE(JSON_EXTRACT(content, '$."1cdf8ca4-f462-4ab7-a19a-9a2df1ee1bba".seasonEpisode.season'))`
+* `propValueSql('propertiesFilm.filmProps', 'seasonEpisode.episode', 'SIGNED')` =>
+  `CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$."1cdf8ca4-f462-4ab7-a19a-9a2df1ee1bba".seasonEpisode.episode')) AS SIGNED)`
+* `propValueSql('profile', 'seasonEpisode.episode')` =>
+  `COALESCE(JSON_UNQUOTE(JSON_EXTRACT(content, '$."79e7fc9f-5cff-41c5-bbd3-c5dff87e34f4".name')), JSON_UNQUOTE(JSON_EXTRACT(content, '$."6d9b91f3-ffac-450b-ba63-3a632a1b1dd1".name')))`
 
 Usage example:
 
@@ -570,10 +605,12 @@ You may need to use the `expression()` function to avoid incorrect escaping.
 
 ### Preparse fields
 
-If you want to execute more advanced queries on a sub-field, the [Preparse plugin](https://github.com/jalendport/craft-preparse) can be used.
+If you want to execute more advanced queries on a sub-field,
+the [Preparse plugin](https://github.com/jalendport/craft-preparse) can be used.
 
 E.g. for querying a number field, you can create a new preparse field with the number value, and then use
-`{{ element.fieldHandle.get('propertyHandle') }}` for the `Twig code to parse` setting. Make sure values are converted to the correct type depending on the `column type` setting.
+`{{ element.fieldHandle.get('propertyHandle') }}` for the `Twig code to parse` setting. Make sure values are converted
+to the correct type depending on the `column type` setting.
 
 Now the sub-field can be queried like a normal field:
 
@@ -585,7 +622,8 @@ Now the sub-field can be queried like a normal field:
 
 ### Hardcoded SQL
 
-The UID under which the data of a properties field is stored in Craft's content column is part of the project config, so it does not change between environments.
+The UID under which the data of a properties field is stored in Craft's content column is part of the project config, so
+it does not change between environments.
 
 So it feels safe to hard code the SQL statements, if you prefer that.
 
@@ -595,7 +633,8 @@ So it feels safe to hard code the SQL statements, if you prefer that.
 %}
 ```
 
-Look in `/config/project/entrytypes/yourEntryType-....yaml` for `fieldlayouts > [fieldLayoutUid] > tabs > elements > yourField > uid`
+Look in `/config/project/entrytypes/yourEntryType-....yaml` for
+`fieldlayouts > [fieldLayoutUid] > tabs > elements > yourField > uid`
 
 ## Relations
 
@@ -610,14 +649,15 @@ param
 
 This does not differentiate between the different sub-fields, so all entries selected by any sub-field are returned.
 
-Using the field param like in `.relatedTo({targetElement: 5231, field: 'personalData'})` will not work. 
+Using the field param like in `.relatedTo({targetElement: 5231, field: 'personalData'})` will not work.
 Craft only supports this for fields extending `BaseRelationField`.
 
 Use `propContains()` instead.
 
 ## GraphQL
 
-Like Craft's native [JSON fields](https://craftcms.com/docs/5.x/reference/field-types/json.html#graphql), Property fields are treated like plain strings, when queried via GraphQL. Values must be deserialized in the client or app.
+Like Craft's native [JSON fields](https://craftcms.com/docs/5.x/reference/field-types/json.html#graphql), Property
+fields are treated like plain strings, when queried via GraphQL. Values must be deserialized in the client or app.
 
 ## Examples: Handling "Boolean with comment" property type
 
@@ -775,7 +815,6 @@ Use multiple inputs with sub-keys for each input:
 ```
 
 Anything that is posted from fields is stored 'as is' in the database json field.
-
 
 ### Callbacks for custom property types
 
@@ -947,7 +986,8 @@ class SkillsConditionRule extends BaseSelectConditionRule implements ElementCond
 Regarding translated content:
 
 * Supports `Copy value from other site` for the whole field.
-* Idea: if the field is translatable, making single sub-fields 'not translatable' could be achieved by syncing the values via hooking into save events.
+* Idea: if the field is translatable, making single sub-fields 'not translatable' could be achieved by syncing the
+  values via hooking into save events.
   See experimental event handler below.
 
 ### Setting property values
@@ -967,11 +1007,13 @@ Does not support nested properties yet.
 
 ## Event handlers
 
-If the field as a whole is translatable, but some sub-fields should be 'not translated', you might use something like the following event handler to sync the values.
+If the field as a whole is translatable, but some sub-fields should be 'not translated', you might use something like
+the following event handler to sync the values.
 
 Intentionally vague, the project this is mainly developed for are not multi-site, so this is just a first experiment.
 
-In a 'skills' setup as shown in the screenshots, the 'isOn' value of the skills should be synced between the different sites, but the textual comment are language specific.
+In a 'skills' setup as shown in the screenshots, the 'isOn' value of the skills should be synced between the different
+sites, but the textual comment are language specific.
 
 Trial and error, tbh. I don't fully understand what Craft is doing...
 

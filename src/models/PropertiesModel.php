@@ -2,34 +2,25 @@
 
 namespace wsydney76\propertiesfield\models;
 
-use CommerceGuys\Addressing\Country\Country;
 use Craft;
 use craft\base\ElementInterface;
 use craft\base\Model;
 use craft\elements\Asset;
 use craft\elements\Entry;
 use craft\fields\data\JsonData;
-use craft\fields\data\MultiOptionsFieldData;
-use craft\fields\data\OptionData;
-use craft\fields\data\SingleOptionFieldData;
-use craft\fields\Money;
-use craft\helpers\DateTimeHelper;
-use Exception;
-use Illuminate\Support\Collection;
+use wsydney76\propertiesfield\events\GetNormalizedValueEvent;
 use wsydney76\propertiesfield\fields\Properties;
 use wsydney76\propertiesfield\PropertiesFieldPlugin;
 use yii\base\InvalidConfigException;
 use function call_user_func;
-use function is_array;
-use function is_string;
-use function json_decode;
-use function reset;
 
 /**
  * The PropertiesModel class is used to represent the properties field model data.
  */
 class PropertiesModel extends Model
 {
+
+    public const EVENT_GET_NORMALIZED_VALUE = 'getNormalizedValue';
 
     private Model $settings;
 
@@ -152,11 +143,25 @@ class PropertiesModel extends Model
     {
         $callback = $this->settings->getAllPropertyTypes()[$config['type']]['onNormalize'] ?? null;
 
+        $normalizedValue = $value;
+
         if ($callback) {
-            return call_user_func($callback, $value, $config);
+            $normalizedValue = call_user_func($callback, $value, $config);
         }
 
-        return $value;
+        if ($this->hasEventHandlers(self::EVENT_GET_NORMALIZED_VALUE)) {
+            $event = new GetNormalizedValueEvent([
+                'field' => $this->field,
+                'element' => $this->element,
+                'propertyConfig' => $config,
+                'value' => $value,
+                'normalizedValue' => $normalizedValue,
+            ]);
+            $this->trigger(self::EVENT_GET_NORMALIZED_VALUE, $event);
+            $normalizedValue = $event->normalizedValue;
+        }
+
+        return $normalizedValue;
     }
 
     /**
@@ -188,8 +193,6 @@ class PropertiesModel extends Model
     }
 
 
-
-
     /**
      * Return properties as JsonData object
      *
@@ -211,7 +214,7 @@ class PropertiesModel extends Model
 
         foreach ($this->propertiesFieldConfig as $propertyConfig) {
             $value = $this->properties[$propertyConfig['handle']] ?? null;
-                $props[$propertyConfig['handle']] = $value;
+            $props[$propertyConfig['handle']] = $value;
         }
         return new JsonData($props);
     }
@@ -227,7 +230,6 @@ class PropertiesModel extends Model
         // JsonData returns a string representation of the JSON data
         return (string)$this->getJsonData();
     }
-
 
 
 }
