@@ -2,6 +2,7 @@
 
 namespace wsydney76\propertiesfield\models;
 
+use Craft;
 use craft\base\Model;
 use phpDocumentor\Reflection\Types\Boolean;
 use function array_merge;
@@ -49,7 +50,13 @@ class Settings extends Model
      */
     public function getAllPropertyTypes()
     {
-        return array_merge(Config::$propertyTypes, $this->extraPropertyTypes);
+        $types = array_merge(Config::$propertyTypes, $this->extraPropertyTypes);;
+        return array_filter($types, function($type) {
+            if (isset($type['requiresPlugin'])) {
+                return Craft::$app->plugins->isPluginEnabled($type['requiresPlugin']);
+            }
+            return true;
+        });
     }
 
 }

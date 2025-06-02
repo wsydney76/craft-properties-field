@@ -1,0 +1,24 @@
+{% import '_includes/forms.twig' as forms %}
+
+
+{% if not propertyConfig.options %}
+    {% exit 403 "Condition missing for productSelect #{propertyConfig['name']}" %}
+{% endif %}
+
+
+{% set options = craft.products(propertyConfig.options|json_decode).withCustomfields(false).all|map(product => {
+    value: product.id,
+    label: product.title
+}) %}
+
+{% if not propertyConfig.required %}
+    {% set options = options|unshift({value: '', label: '-'}) %}
+{% endif %}
+
+<div style="padding: 8px;">
+    {{ forms.selectize({
+        name: propertyConfig.handle,
+        value: value ?? '',
+        options: options,
+    }|merge(fieldConfig)) }}
+</div>

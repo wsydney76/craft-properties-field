@@ -19,14 +19,14 @@
 {% set errors = craft.app.session.flash('propertiesFieldErrors')[field.handle] ?? null %}
 
 {% namespace field.handle %}
-    <table class="editable fullwidth properties-field">
+    <table class="{{ not field.hideLabels ? 'editable' }} fullwidth properties-field">
 
         <tbody>
 
         {# Show a custom header? #}
         {% if field.icon or field.heading or field.heading2 %}
             <tr>
-                <td colspan="2" class="singleline-cell textual"
+                <td colspan="{{ field.hideLabels ? 1 : 2 }}" class="singleline-cell textual"
                     style="background-color: var(--{{ color }}-100); padding: 8px 8px;">
                     <div class="card-titlebar">
                         <div class="flex flex-nowrap flex-gap-s">
@@ -57,29 +57,31 @@
         {% for propertyConfig in propertiesFieldConfig %}
             {% if propertyConfig.type == 'groupHeader' %}
                 <tr>
-                    <th colspan="2" class="group-header">
+                    <th colspan="{{ field.hideLabels ? 1 : 2 }}" class="group-header">
                         {{ propertyConfig.name }}
                     </th>
                 </tr>
             {% else %}
                 <tr>
                     {# The property label #}
-                    <th class="heading-cell thin"
-                        style="background-color: var(--{{ color }}-050); text-align: left; padding: 8px;">
-                        {{ propertyConfig.name|t }}
+                    {% if not field.hideLabels %}
+                        <th class="heading-cell thin"
+                            style="background-color: var(--{{ color }}-050); text-align: left; padding: 8px;">
+                            {{ propertyConfig.name|t }}
 
-                        {# Instructions #}
-                        {% if propertyConfig.instructions ?? null %}
-                            <span class="info">
+                            {# Instructions #}
+                            {% if propertyConfig.instructions ?? null %}
+                                <span class="info">
                             {{ propertyConfig.instructions|t }}
                         </span>
-                        {% endif %}
+                            {% endif %}
 
-                        {# Required? #}
-                        {% if propertyConfig.required ?? false %}
-                            <span class="required"></span>
-                        {% endif %}
-                    </th>
+                            {# Required? #}
+                            {% if propertyConfig.required ?? false %}
+                                <span class="required"></span>
+                            {% endif %}
+                        </th>
+                    {% endif %}
 
                     {# Property inputs using configured template #}
                     <td class="singleline-cell textual"
@@ -97,7 +99,7 @@
                             fieldConfig: propertyConfig.fieldConfig ? propertyConfig.fieldConfig|json_decode : {}
                         }, 'cp')|raw }}
 
-                        {% if errors and errors[propertyConfig.handle] is defined %}
+                        {% if not field.hideLabels and errors and errors[propertyConfig.handle] is defined %}
                             <div style="margin: 4px 8px; color: var(--error-color);">
                                 {{ errors[propertyConfig.handle] }}
                             </div>

@@ -5,6 +5,7 @@ namespace wsydney76\propertiesfield\models;
 use CommerceGuys\Addressing\Country\Country;
 use Craft;
 use craft\base\ElementInterface;
+use craft\commerce\elements\Product;
 use craft\elements\Asset;
 use craft\elements\Entry;
 use craft\fields\data\MultiOptionsFieldData;
@@ -196,6 +197,46 @@ class Config
             'onNormalize' => [self::class, 'normalizeAssets'],
             'onValidate' => [[self::class, 'validateRequired']],
             'onDefineKeywords' => [self::class, 'keywordsMultiElements'],
+        ],
+        'product' => [
+            'label' => 'Product (Single)',
+            'type' => 'product',
+            'isRelation' => true,
+            'template' => '_properties-field/_inputs/elementSelect.twig',
+            'onNormalize' => [self::class, 'normalizeProduct'],
+            'onValidate' => [[self::class, 'validateRequired']],
+            'onDefineKeywords' => [self::class, 'keywordsSingleElement'],
+            'requiresPlugin' => 'commerce',
+        ],
+        'products' => [
+            'label' => 'Products (Multi)',
+            'type' => 'products',
+            'isRelation' => true,
+            'template' => '_properties-field/_inputs/elementSelect.twig',
+            'onNormalize' => [self::class, 'normalizeProducts'],
+            'onValidate' => [[self::class, 'validateRequired']],
+            'onDefineKeywords' => [self::class, 'keywordsMultiElement'],
+            'requiresPlugin' => 'commerce',
+        ],
+        'productSelect' => [
+            'label' => 'Product Select (Single)',
+            'type' => 'productSelect',
+            'isRelation' => true,
+            'template' => '_properties-field/_inputs/productSelect.twig',
+            'onNormalize' => [self::class, 'normalizeProduct'],
+            'onValidate' => [[self::class, 'validateRequired']],
+            'onDefineKeywords' => [self::class, 'keywordsSingleElement'],
+            'requiresPlugin' => 'commerce',
+        ],
+        'productsSelect' => [
+            'label' => 'Products Select (Multi)',
+            'type' => 'productsSelect',
+            'isRelation' => true,
+            'template' => '_properties-field/_inputs/productsSelect.twig',
+            'onNormalize' => [self::class, 'normalizeProducts'],
+            'onValidate' => [[self::class, 'validateRequired']],
+            'onDefineKeywords' => [self::class, 'keywordsMultiElement'],
+            'requiresPlugin' => 'commerce',
         ],
         'country' => [
             'label' => 'Country',
@@ -404,6 +445,26 @@ class Config
         }
 
         return $value ? Asset::find()->id($value)->collect() : Collection::make([]);
+    }
+
+
+    public static function normalizeProduct($value): ?Product
+    {
+        try {
+            return $value ? Product::findOne($value) : null;
+        } catch (Exception $e) {
+            return null; // This can happen if a default value is set for empty values in getNormalizedProperties()
+        }
+    }
+
+    public static function normalizeProducts($value): mixed
+    {
+        // This can happen if a default value is set for empty values in getNormalizedProperties()
+        if (is_string($value)) {
+            return $value;
+        }
+
+        return $value ? Product::find()->id($value)->collect() : Collection::make([]);
     }
 
     /**
@@ -702,7 +763,7 @@ class Config
         return $value->getName();
     }
 
-    private static function addError(ElementInterface $element, Properties $field, array $property, string $message): void
+    protected static function addError(ElementInterface $element, Properties $field, array $property, string $message): void
     {
         $element->addError($field->handle, $field->name . '/' . $property['name'] . ': ' . $message);
 

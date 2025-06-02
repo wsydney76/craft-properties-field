@@ -215,6 +215,9 @@ Enable missing property marker: If enabled, a red border is displayed around pro
 database. This is useful for
 editors to spot properties that need to be set.
 
+Hide labels: If enabled, the property labels are hidden in the field input. 
+This is especially useful for fields that only contain custom property types that are self-explanatory.
+
 Preview template: A twig template that is used to render the preview of the property. This is used for a element index
 columns and cards. See preview section below.
 
@@ -252,8 +255,8 @@ The `Field Config` setting allows to define the columns of the table. This is a 
 `editableTable`form macro accepts.
 
 Additionally, instead of providing a static `options` array for the `select` column type, you can provide a pseudo
-`entrySelect` column type with a `criteria` key with query conditions in JSON format.
-This will dynamically build options with the entry id as value and the entry title as label.
+`entrySelect/productSelect` column type with a `criteria` key with query conditions in JSON format.
+This will dynamically build options with the element id as value and the element title as label.
 
 ```json
 {
@@ -460,8 +463,8 @@ Each property is an array with the following keys:
 * `value`: The raw value of the property
 * `normalizedValue`: The normalized value of the property, depending on the type:
     * `date/datetime`: A formated date string
-    * `entry/asset/entrySelect`: A single element (or null)
-    * `entries/assets/entriesSelect`: An array of elements (or empty array)
+    * `entry/asset/entrySelect/product/productSelect`: A single element (or null)
+    * `entries/assets/entriesSelect/products/productsSelect`: An array of elements (or empty array)
     * `select/radio`: An instance of `craft\fields\data\SingleOptionFieldData`. See Craft CMS documentation of the
       Dropdown
       field for more details.
@@ -757,6 +760,16 @@ return [
             'onValidate' => [[MyPropertiesModel::class, 'validateDemo']], // Optional, see callbacks section below
             'onDefineKeywords' => [[MyPropertiesModel::class, 'keywordsDemo']], // Optional, see callbacks section below
             'onConstruct' => [MyPropertiesModel::class, 'constructInCinemas'], // Optional, see callbacks section below
+        ],
+        'productWithColor' => [
+            'label' => 'Product with Color',
+            'type' => 'productWithColor',
+            'template' => '_properties-field-inputs/productWithColor.twig',
+            'isRelation' => true, // Update relations table
+            'relationSubKeys' => ['product', 'color'], // subkeys that contain element ids
+            'onNormalize' => [MyPropertiesModel::class, 'normalizeProductAndColor'], // Optional, see callbacks section below
+            'onValidate' => [[MyPropertiesModel::class, 'validateProductAndColor']], // Optional, see callbacks section below
+            ...
         ]
     ],
 ];
@@ -812,6 +825,93 @@ Use multiple inputs with sub-keys for each input:
         }) }}
     </div>
 </div>
+```
+
+Example: 
+
+Dynamically update available colors for a selected product.
+
+![Custom property type input](images/custom-type.jpg)
+
+```twig
+{% import '_includes/forms.twig' as forms %}
+
+{% set products = craft.products.orderBy('title').collect %}
+{% set productOptions = products.map(p => {label: p.title, value: p.id}) %}
+
+{% if not propertyConfig.required or value == null %}
+   {% set productOptions = [{label: '--', value: ''}, ...productOptions] %}
+{% endif %}
+
+<div style="display: flex; ">
+    <div style="">
+        {{ forms.selectize({
+            id: "pc_product",
+            name: "#{propertyConfig.handle}[product]",
+            options: productOptions,
+            value: value['product'] ?? null,
+            inputAttributes: {
+                onChange: 'pc_getColor(this)',
+                allowEmptyOption: true,
+                showEmptyOptionInDropdown: true,
+            }
+        }) }}
+    </div>
+
+
+    {% set colorOptions = [] %}
+    {% if value['product'] is defined and value['product'] %}
+
+        {% set product = craft.app.elements.getElementById(value['product']) %}
+        {% if product %}
+            {% set colorOptions = product.getAllColors().map(c => {label: c.title, value: c.id}) %}
+        {% endif %}
+    {% endif %}
+
+    {% set colorOptions = [{label: '--', value: ''}, ...colorOptions] %}
+
+    <div style="margin-left: 12px;">
+
+        {{ forms.select({
+            id: "pc_product_color",
+            name: "#{propertyConfig.handle}[color]",
+            options: colorOptions,
+            value: value['color'] ?? null,
+        }) }}
+
+    </div>
+</div>
+
+{% js %}
+function pc_getColor(select) {
+
+    if (!select.value) {
+        // Happens if selectize is first clicked
+        return;
+    }
+
+    const colorSelect = document.getElementById(select.id + '_color');
+
+    fetch(`/actions/shop/products/get-color?productId=${select.value}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+
+            colorSelect.innerHTML = ''; // Clear existing options
+            colorSelect.add(new Option('---', ''));
+            data.colors.forEach(({ value, label }, index) => {
+                const option = new Option(label, value);
+                colorSelect.add(option);
+                if (index === 0 && value) {
+                    colorSelect.value = value; // Select the first non-empty option
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching colors:', error);
+        });
+}
+{% endjs %}
 ```
 
 Anything that is posted from fields is stored 'as is' in the database json field.

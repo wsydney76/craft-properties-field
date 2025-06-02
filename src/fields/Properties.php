@@ -8,6 +8,7 @@ use craft\base\ElementInterface;
 use craft\base\Field;
 use craft\base\PreviewableFieldInterface;
 use craft\base\RelationalFieldInterface;
+use craft\commerce\elements\Product;
 use craft\elements\Entry;
 use craft\errors\InvalidFieldException;
 use craft\helpers\Cp;
@@ -42,6 +43,8 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
     public string $tip = '';
     // The text to display as warning below the field
     public string $warning = '';
+
+    public bool $hideLabels = false;
 
     // The template that renders the preview in element indexes and cards
     public string $previewTemplate = '';
@@ -167,6 +170,13 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
                 'name' => 'enableMissingMarkers',
                 'on' => $this->enableMissingMarkers,
                 'onLabel' => Craft::t('_properties-field', 'Show markers on edit forms for properties missing in the database'),
+            ]) .
+            Cp::lightswitchFieldHtml([
+                'label' => Craft::t('_properties-field', 'Hide Labels'),
+                'name' => 'hideLabels',
+                'on' => $this->hideLabels,
+                'onLabel' => Craft::t('_properties-field', 'Do not show labels for properties.'),
+                'tip' => Craft::t('_properties-field', 'This is useful the field shows just a single property.'),
             ]) .
             Cp::autosuggestFieldHtml([
                 'label' => Craft::t('_properties-field', 'Preview Template'),
@@ -387,20 +397,23 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
                     $fieldConfig = json_decode($config['fieldConfig'], true);
                     if (isset($fieldConfig['cols'])) {
                         foreach ($fieldConfig['cols'] as $j => $col) {
-                            if (isset($col['type']) && $col['type'] == 'entrySelect' && isset($col['criteria'])) {
-                                $query = Entry::find();
+                            if (isset($col['type']) && ($col['type'] == 'entrySelect' || $col['type'] == 'productSelect') && isset($col['criteria'])) {
+                                $query = match($col['type']) {
+                                    'entrySelect' => Entry::find(),
+                                    'productSelect' => Product::find()
+                                };
                                 Craft::configure($query, $col['criteria']);
-                                $entries = $query->withCustomFields(false)->all();
+                                $elements = $query->withCustomFields(false)->all();
 
                                 $fieldConfig ['cols'][$j]['type'] = 'select';
                                 $fieldConfig ['cols'][$j]['options'] = array_merge(
                                     [['value' => '', 'label' => '-']],
-                                    array_map(function($entry) {
+                                    array_map(function($element) {
                                         return [
-                                            'value' => $entry->id,
-                                            'label' => $entry->title,
+                                            'value' => $element->id,
+                                            'label' => $element->title,
                                         ];
-                                    }, $entries)
+                                    }, $elements)
                                 );
 
                                 $newConfig[$i]['fieldConfig'] = json_encode($fieldConfig);
@@ -464,15 +477,29 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
     {
         $propertyModel = $element->getFieldValue($this->handle);
         $properties = $propertyModel->getNormalizedProperties();
+        $propertyTypes = PropertiesFieldPlugin::getInstance()->getSettings()->getAllPropertyTypes();
         $ids = [];
         foreach ($properties as $property) {
             // The types that provide either a single id or an array of IDs
-            $isRelation = Config::$propertyTypes[$property['type']]['isRelation'] ?? false;
+            $isRelation = $propertyTypes[$property['type']]['isRelation'] ?? false;
             if ($isRelation && !empty($property['value'])) {
                 if (is_string($property['value'])) {
                     $ids[] = $property['value'];
                 } else {
-                    $ids = array_merge($ids, $property['value']);
+                    $subKeys = $propertyTypes[$property['type']]['relationSubKeys'] ?? null;
+
+                    if ($subKeys) {
+                        // If the property is a relation with sub keys, we need to extract the IDs
+                        foreach ($subKeys as $subKey) {
+                            if (isset($property['value'][$subKey]) && !empty($property['value'][$subKey])) {
+                                $ids[] = $property['value'][$subKey];
+                            }
+                        }
+                    } else {
+                        // If the property is a relation without sub keys, we can use the value directly
+                        $ids = array_merge($ids, $property['value']);
+                    }
+
                 }
             }
         }
@@ -484,7 +511,7 @@ class Properties extends Field implements RelationalFieldInterface, CrossSiteCop
                 $fieldConfig = json_decode($propertyConfig['fieldConfig'], true);
                 if (isset($fieldConfig['cols'])) {
                     foreach ($fieldConfig['cols'] as $key => $col) {
-                        if ($col['type'] === 'entrySelect') {
+                        if ($col['type'] === 'entrySelect' || $col['type'] === 'productSelect') {
                             $rows = $propertyModel->properties[$propertyConfig['handle']];
                             if ($rows) {
                                 foreach ($rows as $row) {

@@ -24,6 +24,16 @@
     {% set viewMode = settings.assetsViewMode %}
 {% endif %}
 
+
+{% if propertyConfig.type == 'product' or propertyConfig.type == 'products' %}
+    {% set productTypeHandles = propertyConfig.options|split(',') %}
+    {% set sources = productTypeHandles|map(handle => "productType:#{craft.commerce.productTypes.productTypeByHandle(handle).uid}") %}
+    {% set elementType = 'craft\\commerce\\elements\\Product' %}
+    {% set elements = value ? craft.products.id(value).all : [] %}
+    {% set isSingle = propertyConfig.type == 'product' %}
+    {% set viewMode = settings.entriesViewMode %}
+{% endif %}
+
 <div style="padding: 8px;">
 
     {{ forms.elementSelect({

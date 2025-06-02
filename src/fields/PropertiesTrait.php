@@ -69,7 +69,7 @@ trait PropertiesTrait
     {
         $settings = PropertiesFieldPlugin::getInstance()->getSettings();
 
-        $propertyTypes = array_merge(Config::$propertyTypes, $settings->extraPropertyTypes);
+        $propertyTypes = PropertiesFieldPlugin::getInstance()->getSettings()->getAllPropertyTypes();
 
         $options = [];
 
